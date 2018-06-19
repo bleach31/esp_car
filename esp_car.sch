@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.0.1">
+<eagle version="9.0.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -16486,11 +16486,11 @@ Source: http://www.linear.com/pc/downloadDocument.do?navId=H0,C3,P2222,D3148</de
 <variantdefs>
 </variantdefs>
 <classes>
-<class number="0" name="default" width="0.2032" drill="0.2032">
-<clearance class="0" value="0.2032"/>
+<class number="0" name="default" width="0.3048" drill="0.2032">
+<clearance class="0" value="0.1524"/>
 </class>
-<class number="1" name="L" width="1.016" drill="0.3048">
-<clearance class="1" value="0.254"/>
+<class number="1" name="L" width="1.016" drill="0.4064">
+<clearance class="1" value="0.1524"/>
 </class>
 </classes>
 <parts>
