@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.0.0">
+<eagle version="9.0.1">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -16235,45 +16235,42 @@ Source: http://www.linear.com/pc/downloadDocument.do?navId=H0,C3,P2222,D3148</de
 &lt;b&gt;License: &lt;/b&gt;
 &lt;a href="https://creativecommons.org/licenses/by-sa/4.0/"&gt;Creative Commons Attribution-ShareAlike 4.0 International&lt;/a&gt;</description>
 <packages>
-<package name="ESP-WROOM-32_NOFLASH">
-<wire x1="-9" y1="14.5" x2="9" y2="14.5" width="0.127" layer="51"/>
-<wire x1="9" y1="14.5" x2="9" y2="-11" width="0.127" layer="51"/>
-<wire x1="9" y1="-11" x2="-9" y2="-11" width="0.127" layer="51"/>
-<wire x1="-9" y1="-11" x2="-9" y2="14.5" width="0.127" layer="51"/>
-<smd name="4" x="-9.25" y="3.19" dx="1.5" dy="1" layer="1"/>
-<smd name="5" x="-9.25" y="1.92" dx="1.5" dy="1" layer="1"/>
-<smd name="6" x="-9.25" y="0.65" dx="1.5" dy="1" layer="1"/>
-<smd name="7" x="-9.25" y="-0.62" dx="1.5" dy="1" layer="1"/>
-<smd name="8" x="-9.25" y="-1.89" dx="1.5" dy="1" layer="1"/>
-<smd name="9" x="-9.25" y="-3.16" dx="1.5" dy="1" layer="1"/>
-<smd name="10" x="-9.25" y="-4.43" dx="1.5" dy="1" layer="1"/>
-<smd name="11" x="-9.25" y="-5.7" dx="1.5" dy="1" layer="1"/>
-<smd name="24" x="5.73" y="-11.25" dx="1.5" dy="1" layer="1" rot="R90"/>
-<smd name="25" x="9.25" y="-9.51" dx="1.5" dy="1" layer="1"/>
-<smd name="26" x="9.25" y="-8.24" dx="1.5" dy="1" layer="1"/>
-<smd name="27" x="9.25" y="-6.97" dx="1.5" dy="1" layer="1"/>
-<smd name="28" x="9.25" y="-5.7" dx="1.5" dy="1" layer="1"/>
-<smd name="29" x="9.25" y="-4.43" dx="1.5" dy="1" layer="1"/>
-<smd name="30" x="9.25" y="-3.16" dx="1.5" dy="1" layer="1"/>
-<smd name="31" x="9.25" y="-1.89" dx="1.5" dy="1" layer="1"/>
-<text x="-9" y="-14" size="1.4224" layer="25" font="vector" ratio="12" align="center-left">&gt;NAME</text>
-<text x="9" y="-14" size="1.4224" layer="27" font="vector" ratio="12" align="center-right">&gt;VALUE</text>
-<smd name="12" x="-9.25" y="-6.97" dx="1.5" dy="1" layer="1"/>
-<smd name="13" x="-9.25" y="-8.24" dx="1.5" dy="1" layer="1"/>
-<smd name="14" x="-9.25" y="-9.51" dx="1.5" dy="1" layer="1"/>
-<smd name="15" x="-5.7" y="-11.25" dx="1.5" dy="1" layer="1" rot="R90"/>
-<smd name="16" x="-4.43" y="-11.25" dx="1.5" dy="1" layer="1" rot="R90"/>
-<smd name="3" x="-9.25" y="4.46" dx="1.5" dy="1" layer="1"/>
-<smd name="2" x="-9.25" y="5.73" dx="1.5" dy="1" layer="1"/>
-<smd name="1" x="-9.25" y="7" dx="1.5" dy="1" layer="1"/>
-<smd name="23" x="4.46" y="-11.25" dx="1.5" dy="1" layer="1" rot="R90"/>
-<smd name="32" x="9.25" y="-0.62" dx="1.5" dy="1" layer="1"/>
-<smd name="33" x="9.25" y="0.65" dx="1.5" dy="1" layer="1"/>
-<smd name="34" x="9.25" y="1.92" dx="1.5" dy="1" layer="1"/>
-<smd name="35" x="9.25" y="3.19" dx="1.5" dy="1" layer="1"/>
-<smd name="36" x="9.25" y="4.46" dx="1.5" dy="1" layer="1"/>
-<smd name="37" x="9.25" y="5.73" dx="1.5" dy="1" layer="1"/>
-<smd name="38" x="9.25" y="7" dx="1.5" dy="1" layer="1"/>
+<package name="ESP-WROOM-32_NOFLASH_PINHEAD">
+<wire x1="0" y1="25.5" x2="18" y2="25.5" width="0.127" layer="51"/>
+<wire x1="18" y1="25.5" x2="18" y2="0" width="0.127" layer="51"/>
+<wire x1="18" y1="0" x2="0" y2="0" width="0.127" layer="51"/>
+<wire x1="0" y1="0" x2="0" y2="25.5" width="0.127" layer="51"/>
+<pad name="P$1" x="0" y="18" drill="0.6" diameter="0.9" shape="long" rot="R180"/>
+<pad name="P$2" x="0" y="16.73" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$3" x="0" y="15.46" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$4" x="0" y="14.19" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$5" x="0" y="12.92" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$6" x="0" y="11.65" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$7" x="0" y="10.38" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$8" x="0" y="9.11" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$9" x="0" y="7.84" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$10" x="0" y="6.57" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$11" x="0" y="5.3" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$12" x="0" y="4.03" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$13" x="0" y="2.76" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$14" x="0" y="1.49" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$25" x="18" y="1.49" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$26" x="18" y="2.76" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$27" x="18" y="4.03" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$28" x="18" y="5.3" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$29" x="18" y="6.57" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$30" x="18" y="7.84" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$31" x="18" y="9.11" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$33" x="18" y="11.65" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$34" x="18" y="12.92" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$35" x="18" y="14.19" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$36" x="18" y="15.46" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$37" x="18" y="16.73" drill="0.6" diameter="1.016" shape="long"/>
+<pad name="P$38" x="18" y="18" drill="0.6" diameter="0.9" shape="long"/>
+<pad name="P$15" x="3.3" y="0" drill="0.6" diameter="0.9" shape="long" rot="R90"/>
+<pad name="P$16" x="4.57" y="0" drill="0.6" diameter="0.9" shape="long" rot="R90"/>
+<pad name="P$23" x="13.46" y="0" drill="0.6" diameter="0.9" shape="long" rot="R90"/>
+<pad name="P$24" x="14.73" y="0" drill="0.6" diameter="0.9" shape="long" rot="R90"/>
 </package>
 </packages>
 <symbols>
@@ -16318,45 +16315,44 @@ Source: http://www.linear.com/pc/downloadDocument.do?navId=H0,C3,P2222,D3148</de
 </symbol>
 </symbols>
 <devicesets>
-<deviceset name="ESP-WROOM-32_NOFLASH" prefix="U">
-<description>Espressif Systems ESP-WROOM-32</description>
+<deviceset name="ESP-WROOM-32_NOFLASH_PINHEAD">
 <gates>
-<gate name="G$1" symbol="ESP-WROOM-32_NOFLASH" x="0" y="0"/>
+<gate name="G$1" symbol="ESP-WROOM-32_NOFLASH" x="-10.16" y="73.66"/>
 </gates>
 <devices>
-<device name="" package="ESP-WROOM-32_NOFLASH">
+<device name="" package="ESP-WROOM-32_NOFLASH_PINHEAD">
 <connects>
-<connect gate="G$1" pin="3V3" pad="2"/>
-<connect gate="G$1" pin="EN" pad="3"/>
-<connect gate="G$1" pin="GND@1" pad="1"/>
-<connect gate="G$1" pin="GND@2" pad="15"/>
-<connect gate="G$1" pin="GND@3" pad="38"/>
-<connect gate="G$1" pin="IO0" pad="25"/>
-<connect gate="G$1" pin="IO12" pad="14"/>
-<connect gate="G$1" pin="IO13" pad="16"/>
-<connect gate="G$1" pin="IO14" pad="13"/>
-<connect gate="G$1" pin="IO15" pad="23"/>
-<connect gate="G$1" pin="IO16" pad="27"/>
-<connect gate="G$1" pin="IO17" pad="28"/>
-<connect gate="G$1" pin="IO18" pad="30"/>
-<connect gate="G$1" pin="IO19" pad="31"/>
-<connect gate="G$1" pin="IO2" pad="24"/>
-<connect gate="G$1" pin="IO21" pad="33"/>
-<connect gate="G$1" pin="IO22" pad="36"/>
-<connect gate="G$1" pin="IO23" pad="37"/>
-<connect gate="G$1" pin="IO25" pad="10"/>
-<connect gate="G$1" pin="IO26" pad="11"/>
-<connect gate="G$1" pin="IO27" pad="12"/>
-<connect gate="G$1" pin="IO32" pad="8"/>
-<connect gate="G$1" pin="IO33" pad="9"/>
-<connect gate="G$1" pin="IO34" pad="6"/>
-<connect gate="G$1" pin="IO35" pad="7"/>
-<connect gate="G$1" pin="IO4" pad="26"/>
-<connect gate="G$1" pin="IO5" pad="29"/>
-<connect gate="G$1" pin="RXD0" pad="34"/>
-<connect gate="G$1" pin="SENSOR_VN" pad="5"/>
-<connect gate="G$1" pin="SENSOR_VP" pad="4"/>
-<connect gate="G$1" pin="TXD0" pad="35"/>
+<connect gate="G$1" pin="3V3" pad="P$2"/>
+<connect gate="G$1" pin="EN" pad="P$3"/>
+<connect gate="G$1" pin="GND@1" pad="P$1"/>
+<connect gate="G$1" pin="GND@2" pad="P$15"/>
+<connect gate="G$1" pin="GND@3" pad="P$38"/>
+<connect gate="G$1" pin="IO0" pad="P$25"/>
+<connect gate="G$1" pin="IO12" pad="P$14"/>
+<connect gate="G$1" pin="IO13" pad="P$16"/>
+<connect gate="G$1" pin="IO14" pad="P$13"/>
+<connect gate="G$1" pin="IO15" pad="P$23"/>
+<connect gate="G$1" pin="IO16" pad="P$27"/>
+<connect gate="G$1" pin="IO17" pad="P$28"/>
+<connect gate="G$1" pin="IO18" pad="P$30"/>
+<connect gate="G$1" pin="IO19" pad="P$31"/>
+<connect gate="G$1" pin="IO2" pad="P$24"/>
+<connect gate="G$1" pin="IO21" pad="P$33"/>
+<connect gate="G$1" pin="IO22" pad="P$36"/>
+<connect gate="G$1" pin="IO23" pad="P$37"/>
+<connect gate="G$1" pin="IO25" pad="P$10"/>
+<connect gate="G$1" pin="IO26" pad="P$11"/>
+<connect gate="G$1" pin="IO27" pad="P$12"/>
+<connect gate="G$1" pin="IO32" pad="P$8"/>
+<connect gate="G$1" pin="IO33" pad="P$9"/>
+<connect gate="G$1" pin="IO34" pad="P$6"/>
+<connect gate="G$1" pin="IO35" pad="P$7"/>
+<connect gate="G$1" pin="IO4" pad="P$26"/>
+<connect gate="G$1" pin="IO5" pad="P$29"/>
+<connect gate="G$1" pin="RXD0" pad="P$34"/>
+<connect gate="G$1" pin="SENSOR_VN" pad="P$5"/>
+<connect gate="G$1" pin="SENSOR_VP" pad="P$4"/>
+<connect gate="G$1" pin="TXD0" pad="P$35"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -16489,7 +16485,7 @@ Source: http://www.linear.com/pc/downloadDocument.do?navId=H0,C3,P2222,D3148</de
 <class number="0" name="default" width="0.3048" drill="0.2032">
 <clearance class="0" value="0.1524"/>
 </class>
-<class number="1" name="L" width="1.016" drill="0.4064">
+<class number="1" name="L" width="1.016" drill="0.8128">
 <clearance class="1" value="0.1524"/>
 </class>
 </classes>
@@ -16573,8 +16569,8 @@ Source: http://www.linear.com/pc/downloadDocument.do?navId=H0,C3,P2222,D3148</de
 <part name="GY-530R" library="pinhead" deviceset="PINHD-1X5" device=""/>
 <part name="GY-530C" library="pinhead" deviceset="PINHD-1X5" device=""/>
 <part name="GY-530L" library="pinhead" deviceset="PINHD-1X5" device=""/>
-<part name="U1" library="esp32 _my" deviceset="ESP-WROOM-32_NOFLASH" device=""/>
 <part name="U$1" library="adafruit_my" deviceset="TB6612_NEW" device=""/>
+<part name="ESP32" library="esp32 _my" deviceset="ESP-WROOM-32_NOFLASH_PINHEAD" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -16709,8 +16705,8 @@ GND</text>
 <instance part="GY-530R" gate="A" x="289.56" y="63.5"/>
 <instance part="GY-530C" gate="A" x="289.56" y="38.1"/>
 <instance part="GY-530L" gate="A" x="289.56" y="12.7"/>
-<instance part="U1" gate="G$1" x="172.72" y="83.82"/>
 <instance part="U$1" gate="G$1" x="398.78" y="60.96" rot="R180"/>
+<instance part="ESP32" gate="G$1" x="172.72" y="83.82"/>
 </instances>
 <busses>
 </busses>
@@ -16850,9 +16846,9 @@ GND</text>
 <wire x1="170.18" y1="116.84" x2="170.18" y2="114.3" width="0.1524" layer="91"/>
 <wire x1="170.18" y1="114.3" x2="190.5" y2="114.3" width="0.1524" layer="91"/>
 <wire x1="190.5" y1="114.3" x2="190.5" y2="109.22" width="0.1524" layer="91"/>
-<pinref part="U1" gate="G$1" pin="GND@1"/>
-<pinref part="U1" gate="G$1" pin="GND@3"/>
-<pinref part="U1" gate="G$1" pin="GND@2"/>
+<pinref part="ESP32" gate="G$1" pin="GND@1"/>
+<pinref part="ESP32" gate="G$1" pin="GND@3"/>
+<pinref part="ESP32" gate="G$1" pin="GND@2"/>
 </segment>
 <segment>
 <pinref part="GND11" gate="1" pin="GND"/>
@@ -16963,7 +16959,7 @@ GND</text>
 <pinref part="C6" gate="G$1" pin="2"/>
 <junction x="146.05" y="106.68"/>
 <wire x1="154.94" y1="106.68" x2="146.05" y2="106.68" width="0.1524" layer="91"/>
-<pinref part="U1" gate="G$1" pin="3V3"/>
+<pinref part="ESP32" gate="G$1" pin="3V3"/>
 </segment>
 <segment>
 <pinref part="SERIAL" gate="A" pin="3"/>
@@ -17105,7 +17101,7 @@ GND</text>
 <wire x1="114.3" y1="104.14" x2="114.3" y2="93.98" width="0.1524" layer="91"/>
 <wire x1="114.3" y1="93.98" x2="109.22" y2="93.98" width="0.1524" layer="91"/>
 <label x="127" y="104.14" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="EN"/>
+<pinref part="ESP32" gate="G$1" pin="EN"/>
 </segment>
 </net>
 <net name="IO0" class="0">
@@ -17122,7 +17118,7 @@ GND</text>
 <wire x1="198.12" y1="76.2" x2="198.12" y2="60.96" width="0.1524" layer="91"/>
 <pinref part="T1" gate="1" pin="P"/>
 <wire x1="198.12" y1="76.2" x2="199.39" y2="76.2" width="0.1524" layer="91"/>
-<pinref part="U1" gate="G$1" pin="IO0"/>
+<pinref part="ESP32" gate="G$1" pin="IO0"/>
 </segment>
 </net>
 <net name="DTR" class="0">
@@ -17143,7 +17139,7 @@ GND</text>
 <segment>
 <wire x1="190.5" y1="101.6" x2="195.58" y2="101.6" width="0.1524" layer="91"/>
 <label x="193.04" y="101.6" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="TXD0"/>
+<pinref part="ESP32" gate="G$1" pin="TXD0"/>
 </segment>
 <segment>
 <pinref part="SERIAL" gate="A" pin="5"/>
@@ -17155,7 +17151,7 @@ GND</text>
 <segment>
 <wire x1="190.5" y1="99.06" x2="195.58" y2="99.06" width="0.1524" layer="91"/>
 <label x="193.04" y="99.06" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="RXD0"/>
+<pinref part="ESP32" gate="G$1" pin="RXD0"/>
 </segment>
 <segment>
 <pinref part="SERIAL" gate="A" pin="4"/>
@@ -17213,7 +17209,7 @@ GND</text>
 <segment>
 <wire x1="154.94" y1="86.36" x2="147.32" y2="86.36" width="0.1524" layer="91"/>
 <label x="139.7" y="86.36" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO25"/>
+<pinref part="ESP32" gate="G$1" pin="IO25"/>
 </segment>
 </net>
 <net name="MR_IN2" class="0">
@@ -17225,7 +17221,7 @@ GND</text>
 <segment>
 <wire x1="190.5" y1="91.44" x2="195.58" y2="91.44" width="0.1524" layer="91"/>
 <label x="193.04" y="91.44" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO19"/>
+<pinref part="ESP32" gate="G$1" pin="IO19"/>
 </segment>
 </net>
 <net name="MR_IN1" class="0">
@@ -17237,7 +17233,7 @@ GND</text>
 <segment>
 <wire x1="190.5" y1="88.9" x2="195.58" y2="88.9" width="0.1524" layer="91"/>
 <label x="193.04" y="88.9" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO18"/>
+<pinref part="ESP32" gate="G$1" pin="IO18"/>
 </segment>
 </net>
 <net name="ML_IN1" class="0">
@@ -17249,7 +17245,7 @@ GND</text>
 <segment>
 <wire x1="190.5" y1="81.28" x2="195.58" y2="81.28" width="0.1524" layer="91"/>
 <label x="193.04" y="81.28" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO16"/>
+<pinref part="ESP32" gate="G$1" pin="IO16"/>
 </segment>
 </net>
 <net name="ML_IN2" class="0">
@@ -17261,7 +17257,7 @@ GND</text>
 <segment>
 <wire x1="190.5" y1="83.82" x2="195.58" y2="83.82" width="0.1524" layer="91"/>
 <label x="193.04" y="83.82" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO17"/>
+<pinref part="ESP32" gate="G$1" pin="IO17"/>
 </segment>
 </net>
 <net name="ML_PWM" class="0">
@@ -17273,7 +17269,7 @@ GND</text>
 <segment>
 <wire x1="154.94" y1="83.82" x2="147.32" y2="83.82" width="0.1524" layer="91"/>
 <label x="139.7" y="83.82" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO26"/>
+<pinref part="ESP32" gate="G$1" pin="IO26"/>
 </segment>
 </net>
 <net name="N$7" class="0">
@@ -17337,7 +17333,7 @@ GND</text>
 <segment>
 <wire x1="154.94" y1="101.6" x2="147.32" y2="101.6" width="0.1524" layer="91"/>
 <label x="139.7" y="101.6" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="SENSOR_VP"/>
+<pinref part="ESP32" gate="G$1" pin="SENSOR_VP"/>
 </segment>
 </net>
 <net name="ENCR_B" class="0">
@@ -17350,7 +17346,7 @@ GND</text>
 <segment>
 <wire x1="154.94" y1="99.06" x2="147.32" y2="99.06" width="0.1524" layer="91"/>
 <label x="139.7" y="99.06" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="SENSOR_VN"/>
+<pinref part="ESP32" gate="G$1" pin="SENSOR_VN"/>
 </segment>
 </net>
 <net name="ENCL_A" class="0">
@@ -17363,7 +17359,7 @@ GND</text>
 <segment>
 <wire x1="154.94" y1="96.52" x2="147.32" y2="96.52" width="0.1524" layer="91"/>
 <label x="139.7" y="96.52" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO34"/>
+<pinref part="ESP32" gate="G$1" pin="IO34"/>
 </segment>
 </net>
 <net name="ENCL_B" class="0">
@@ -17376,7 +17372,7 @@ GND</text>
 <segment>
 <wire x1="154.94" y1="93.98" x2="147.32" y2="93.98" width="0.1524" layer="91"/>
 <label x="139.7" y="93.98" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO35"/>
+<pinref part="ESP32" gate="G$1" pin="IO35"/>
 </segment>
 </net>
 <net name="IO12" class="0">
@@ -17384,7 +17380,7 @@ GND</text>
 <pinref part="T5" gate="1" pin="P"/>
 <wire x1="149.86" y1="76.2" x2="154.94" y2="76.2" width="0.1524" layer="91"/>
 <label x="149.86" y="76.2" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO12"/>
+<pinref part="ESP32" gate="G$1" pin="IO12"/>
 </segment>
 <segment>
 <wire x1="48.26" y1="-20.32" x2="35.56" y2="-20.32" width="0.1524" layer="91"/>
@@ -17397,7 +17393,7 @@ GND</text>
 <wire x1="190.5" y1="78.74" x2="203.2" y2="78.74" width="0.1524" layer="91"/>
 <pinref part="T0" gate="1" pin="P"/>
 <label x="193.04" y="78.74" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO4"/>
+<pinref part="ESP32" gate="G$1" pin="IO4"/>
 </segment>
 </net>
 <net name="I2C_SCL" class="0">
@@ -17422,7 +17418,7 @@ GND</text>
 <pinref part="GY-530R" gate="A" pin="3"/>
 <pinref part="GY-530C" gate="A" pin="3"/>
 <pinref part="GY-530L" gate="A" pin="3"/>
-<pinref part="U1" gate="G$1" pin="IO22"/>
+<pinref part="ESP32" gate="G$1" pin="IO22"/>
 </segment>
 <segment>
 <wire x1="48.26" y1="-7.62" x2="35.56" y2="-7.62" width="0.1524" layer="91"/>
@@ -17454,7 +17450,7 @@ GND</text>
 <pinref part="GY-530R" gate="A" pin="4"/>
 <pinref part="GY-530C" gate="A" pin="4"/>
 <pinref part="GY-530L" gate="A" pin="4"/>
-<pinref part="U1" gate="G$1" pin="IO21"/>
+<pinref part="ESP32" gate="G$1" pin="IO21"/>
 </segment>
 <segment>
 <wire x1="35.56" y1="-10.16" x2="48.26" y2="-10.16" width="0.1524" layer="91"/>
@@ -17477,7 +17473,7 @@ GND</text>
 <wire x1="190.5" y1="106.68" x2="254" y2="106.68" width="0.1524" layer="91"/>
 <wire x1="254" y1="106.68" x2="254" y2="58.42" width="0.1524" layer="91"/>
 <pinref part="GY-530R" gate="A" pin="5"/>
-<pinref part="U1" gate="G$1" pin="IO23"/>
+<pinref part="ESP32" gate="G$1" pin="IO23"/>
 </segment>
 </net>
 <net name="N$6" class="0">
@@ -17505,7 +17501,7 @@ GND</text>
 <segment>
 <wire x1="190.5" y1="86.36" x2="208.28" y2="86.36" width="0.1524" layer="91"/>
 <label x="208.28" y="83.82" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO5"/>
+<pinref part="ESP32" gate="G$1" pin="IO5"/>
 </segment>
 <segment>
 <wire x1="35.56" y1="-15.24" x2="48.26" y2="-15.24" width="0.1524" layer="91"/>
@@ -17518,7 +17514,7 @@ GND</text>
 <pinref part="T2" gate="1" pin="P"/>
 <wire x1="190.5" y1="71.12" x2="203.2" y2="71.12" width="0.1524" layer="91"/>
 <label x="193.04" y="71.12" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO2"/>
+<pinref part="ESP32" gate="G$1" pin="IO2"/>
 </segment>
 <segment>
 <wire x1="48.26" y1="-12.7" x2="35.56" y2="-12.7" width="0.1524" layer="91"/>
@@ -17531,7 +17527,7 @@ GND</text>
 <pinref part="T3" gate="1" pin="P"/>
 <wire x1="190.5" y1="68.58" x2="200.66" y2="68.58" width="0.1524" layer="91"/>
 <label x="193.04" y="68.58" size="1.778" layer="95"/>
-<pinref part="U1" gate="G$1" pin="IO15"/>
+<pinref part="ESP32" gate="G$1" pin="IO15"/>
 </segment>
 <segment>
 <wire x1="48.26" y1="-17.78" x2="35.56" y2="-17.78" width="0.1524" layer="91"/>
@@ -17544,7 +17540,7 @@ GND</text>
 <wire x1="154.94" y1="68.58" x2="109.22" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="LED_FL" gate="G$1" pin="DI"/>
 <wire x1="109.22" y1="68.58" x2="109.22" y2="2.54" width="0.1524" layer="91"/>
-<pinref part="U1" gate="G$1" pin="IO13"/>
+<pinref part="ESP32" gate="G$1" pin="IO13"/>
 </segment>
 </net>
 <net name="N$8" class="0">
@@ -17552,7 +17548,7 @@ GND</text>
 <wire x1="154.94" y1="78.74" x2="144.78" y2="78.74" width="0.1524" layer="91"/>
 <wire x1="144.78" y1="78.74" x2="144.78" y2="58.42" width="0.1524" layer="91"/>
 <pinref part="BUZ+" gate="1" pin="P"/>
-<pinref part="U1" gate="G$1" pin="IO14"/>
+<pinref part="ESP32" gate="G$1" pin="IO14"/>
 </segment>
 </net>
 <net name="N$3" class="0">
@@ -17563,7 +17559,7 @@ GND</text>
 <wire x1="152.4" y1="90.17" x2="251.46" y2="90.17" width="0.1524" layer="91"/>
 <wire x1="251.46" y1="90.17" x2="251.46" y2="33.02" width="0.1524" layer="91"/>
 <pinref part="GY-530C" gate="A" pin="5"/>
-<pinref part="U1" gate="G$1" pin="IO32"/>
+<pinref part="ESP32" gate="G$1" pin="IO32"/>
 </segment>
 </net>
 <net name="N$19" class="0">
@@ -17574,7 +17570,7 @@ GND</text>
 <wire x1="287.02" y1="7.62" x2="248.92" y2="7.62" width="0.1524" layer="91"/>
 <wire x1="248.92" y1="87.63" x2="248.92" y2="7.62" width="0.1524" layer="91"/>
 <pinref part="GY-530L" gate="A" pin="5"/>
-<pinref part="U1" gate="G$1" pin="IO33"/>
+<pinref part="ESP32" gate="G$1" pin="IO33"/>
 </segment>
 </net>
 <net name="IO27" class="0">
@@ -17586,7 +17582,7 @@ GND</text>
 <wire x1="60.96" y1="83.82" x2="60.96" y2="81.28" width="0.1524" layer="91"/>
 <junction x="60.96" y="81.28"/>
 <wire x1="60.96" y1="81.28" x2="60.96" y2="78.74" width="0.1524" layer="91"/>
-<pinref part="U1" gate="G$1" pin="IO27"/>
+<pinref part="ESP32" gate="G$1" pin="IO27"/>
 </segment>
 </net>
 </nets>
