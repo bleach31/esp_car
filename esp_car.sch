@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.0.1">
+<eagle version="9.0.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -16488,6 +16488,9 @@ Source: http://www.linear.com/pc/downloadDocument.do?navId=H0,C3,P2222,D3148</de
 <class number="1" name="L" width="1.016" drill="0.8128">
 <clearance class="1" value="0.1524"/>
 </class>
+<class number="2" name="LL" width="1.524" drill="1.3208">
+<clearance class="2" value="0.1524"/>
+</class>
 </classes>
 <parts>
 <part name="SERIAL" library="adafruit" deviceset="PINHD-1X6" device=""/>
@@ -16497,10 +16500,8 @@ Source: http://www.linear.com/pc/downloadDocument.do?navId=H0,C3,P2222,D3148</de
 <part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1608" package3d_urn="urn:adsk.eagle:package:23621/2" value="10uF"/>
 <part name="C2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1608" package3d_urn="urn:adsk.eagle:package:23621/2" value="10uF"/>
 <part name="+3V2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+3V3" device=""/>
-<part name="NJM7805" library="linear" library_urn="urn:adsk.eagle:library:262" deviceset="78*" device="DT" package3d_urn="urn:adsk.eagle:package:16415/2" technology="06"/>
 <part name="GND2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="C3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1608" package3d_urn="urn:adsk.eagle:package:23621/2" value="10uF"/>
-<part name="C4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1608" package3d_urn="urn:adsk.eagle:package:23621/2" value="10uF"/>
+<part name="C3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1608" package3d_urn="urn:adsk.eagle:package:23621/2" value="0.33u"/>
 <part name="NDS9936" library="zetex" library_urn="urn:adsk.eagle:library:418" deviceset="NMOS2" device="SO8" package3d_urn="urn:adsk.eagle:package:30987/1"/>
 <part name="R1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:23555/2" value="10k"/>
 <part name="C5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C1608" package3d_urn="urn:adsk.eagle:package:23621/2" value="0.1uF"/>
@@ -16571,6 +16572,8 @@ Source: http://www.linear.com/pc/downloadDocument.do?navId=H0,C3,P2222,D3148</de
 <part name="GY-530L" library="pinhead" deviceset="PINHD-1X5" device=""/>
 <part name="U$1" library="adafruit_my" deviceset="TB6612_NEW" device=""/>
 <part name="ESP32" library="esp32 _my" deviceset="ESP-WROOM-32_NOFLASH_PINHEAD" device=""/>
+<part name="TA4805S" library="linear" library_urn="urn:adsk.eagle:library:262" deviceset="78*" device="TV" package3d_urn="urn:adsk.eagle:package:16417/1" technology="8"/>
+<part name="C4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C3225" package3d_urn="urn:adsk.eagle:package:23655/2" value="33u"/>
 </parts>
 <sheets>
 <sheet>
@@ -16632,10 +16635,8 @@ GND</text>
 <instance part="C1" gate="G$1" x="-5.08" y="93.98"/>
 <instance part="C2" gate="G$1" x="-40.64" y="93.98"/>
 <instance part="+3V2" gate="G$1" x="93.98" y="124.46" rot="R90"/>
-<instance part="NJM7805" gate="A1" x="-20.32" y="58.42"/>
 <instance part="GND2" gate="1" x="-20.32" y="35.56"/>
 <instance part="C3" gate="G$1" x="-38.1" y="48.26"/>
-<instance part="C4" gate="G$1" x="-5.08" y="48.26"/>
 <instance part="NDS9936" gate="A" x="-38.1" y="7.62"/>
 <instance part="NDS9936" gate="B" x="-38.1" y="-12.7" rot="MR180"/>
 <instance part="R1" gate="G$1" x="114.3" y="109.22" rot="R90"/>
@@ -16707,6 +16708,11 @@ GND</text>
 <instance part="GY-530L" gate="A" x="289.56" y="12.7"/>
 <instance part="U$1" gate="G$1" x="398.78" y="60.96" rot="R180"/>
 <instance part="ESP32" gate="G$1" x="172.72" y="83.82"/>
+<instance part="TA4805S" gate="A1" x="-20.32" y="58.42"/>
+<instance part="C4" gate="G$1" x="-5.08" y="48.26" smashed="yes">
+<attribute name="NAME" x="-3.556" y="48.641" size="1.778" layer="95"/>
+<attribute name="VALUE" x="-3.556" y="43.561" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -16762,10 +16768,8 @@ GND</text>
 <pinref part="GND2" gate="1" pin="GND"/>
 <wire x1="-38.1" y1="43.18" x2="-38.1" y2="38.1" width="0.1524" layer="91"/>
 <wire x1="-38.1" y1="38.1" x2="-20.32" y2="38.1" width="0.1524" layer="91"/>
-<pinref part="NJM7805" gate="A1" pin="GND"/>
 <wire x1="-20.32" y1="38.1" x2="-20.32" y2="50.8" width="0.1524" layer="91"/>
 <wire x1="-20.32" y1="38.1" x2="-5.08" y2="38.1" width="0.1524" layer="91"/>
-<pinref part="C4" gate="G$1" pin="2"/>
 <wire x1="-5.08" y1="38.1" x2="-5.08" y2="43.18" width="0.1524" layer="91"/>
 <junction x="-20.32" y="38.1"/>
 <pinref part="C3" gate="G$1" pin="2"/>
@@ -16774,6 +16778,8 @@ GND</text>
 <wire x1="10.16" y1="35.56" x2="10.16" y2="48.26" width="0.1524" layer="91"/>
 <wire x1="10.16" y1="48.26" x2="25.4" y2="48.26" width="0.1524" layer="91"/>
 <pinref part="5VOUT" gate="G$1" pin="2"/>
+<pinref part="TA4805S" gate="A1" pin="GND"/>
+<pinref part="C4" gate="G$1" pin="2"/>
 </segment>
 <segment>
 <pinref part="GND3" gate="1" pin="GND"/>
@@ -17033,9 +17039,7 @@ GND</text>
 </net>
 <net name="+5V" class="1">
 <segment>
-<pinref part="NJM7805" gate="A1" pin="VO"/>
 <wire x1="-10.16" y1="58.42" x2="-5.08" y2="58.42" width="0.1524" layer="91"/>
-<pinref part="C4" gate="G$1" pin="1"/>
 <wire x1="-5.08" y1="58.42" x2="5.08" y2="58.42" width="0.1524" layer="91"/>
 <wire x1="-5.08" y1="50.8" x2="-5.08" y2="58.42" width="0.1524" layer="91"/>
 <junction x="-5.08" y="58.42"/>
@@ -17043,6 +17047,8 @@ GND</text>
 <wire x1="-5.08" y1="58.42" x2="2.54" y2="50.8" width="0.1524" layer="91"/>
 <wire x1="2.54" y1="50.8" x2="25.4" y2="50.8" width="0.1524" layer="91"/>
 <pinref part="5VOUT" gate="G$1" pin="1"/>
+<pinref part="TA4805S" gate="A1" pin="VO"/>
+<pinref part="C4" gate="G$1" pin="1"/>
 </segment>
 <segment>
 <pinref part="LED_FR" gate="G$1" pin="VDD"/>
@@ -17175,7 +17181,7 @@ GND</text>
 <label x="-71.12" y="-5.08" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="VCC" class="1">
+<net name="VCC" class="2">
 <segment>
 <wire x1="-50.8" y1="111.76" x2="-50.8" y2="104.14" width="0.1524" layer="91"/>
 <pinref part="C2" gate="G$1" pin="1"/>
@@ -17184,7 +17190,6 @@ GND</text>
 <wire x1="-40.64" y1="96.52" x2="-40.64" y2="104.14" width="0.1524" layer="91"/>
 <junction x="-40.64" y="104.14"/>
 <junction x="-50.8" y="104.14"/>
-<pinref part="NJM7805" gate="A1" pin="VI"/>
 <wire x1="-50.8" y1="104.14" x2="-50.8" y2="58.42" width="0.1524" layer="91"/>
 <wire x1="-50.8" y1="58.42" x2="-38.1" y2="58.42" width="0.1524" layer="91"/>
 <pinref part="C3" gate="G$1" pin="1"/>
@@ -17198,6 +17203,7 @@ GND</text>
 <pinref part="IC2" gate="G$1" pin="!SHDN"/>
 <pinref part="IC2" gate="G$1" pin="IN"/>
 <wire x1="-40.64" y1="104.14" x2="-33.02" y2="104.14" width="0.1524" layer="91"/>
+<pinref part="TA4805S" gate="A1" pin="VI"/>
 </segment>
 </net>
 <net name="MR_PWM" class="0">
@@ -17280,25 +17286,16 @@ GND</text>
 <pinref part="U$1" gate="G$1" pin="STBY"/>
 </segment>
 </net>
-<net name="ML+" class="1">
-<segment>
-<wire x1="429.26" y1="40.64" x2="424.18" y2="38.1" width="0.1524" layer="91"/>
-<wire x1="429.26" y1="40.64" x2="449.58" y2="40.64" width="0.1524" layer="91"/>
-<pinref part="ML" gate="G$1" pin="1"/>
-<label x="426.72" y="40.64" size="1.778" layer="95"/>
-<pinref part="U$1" gate="G$1" pin="AO1"/>
-</segment>
-</net>
 <net name="ML-" class="1">
 <segment>
-<wire x1="424.18" y1="53.34" x2="436.88" y2="53.34" width="0.1524" layer="91"/>
-<wire x1="436.88" y1="53.34" x2="436.88" y2="27.94" width="0.1524" layer="91"/>
 <wire x1="436.88" y1="27.94" x2="449.58" y2="27.94" width="0.1524" layer="91"/>
 <pinref part="ML" gate="G$1" pin="6"/>
 <wire x1="449.58" y1="27.94" x2="452.12" y2="27.94" width="0.1524" layer="91"/>
 <junction x="449.58" y="27.94"/>
 <label x="426.72" y="53.34" size="1.778" layer="95"/>
-<pinref part="U$1" gate="G$1" pin="AO2"/>
+<pinref part="U$1" gate="G$1" pin="AO1"/>
+<wire x1="424.18" y1="38.1" x2="436.88" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="436.88" y1="38.1" x2="436.88" y2="27.94" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MR-" class="1">
@@ -17583,6 +17580,15 @@ GND</text>
 <junction x="60.96" y="81.28"/>
 <wire x1="60.96" y1="81.28" x2="60.96" y2="78.74" width="0.1524" layer="91"/>
 <pinref part="ESP32" gate="G$1" pin="IO27"/>
+</segment>
+</net>
+<net name="N$38" class="0">
+<segment>
+<pinref part="ML" gate="G$1" pin="1"/>
+<wire x1="449.58" y1="40.64" x2="436.88" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="436.88" y1="40.64" x2="436.88" y2="53.34" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="AO2"/>
+<wire x1="436.88" y1="53.34" x2="424.18" y2="53.34" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
