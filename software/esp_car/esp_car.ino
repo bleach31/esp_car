@@ -1,5 +1,7 @@
-#include <Wire.h>
+#include <Adafruit_NeoPixel.h>
 
+#include <Wire.h>
+#define ESP32
 //////////////////////////Motor//////////////////////
 #include "SparkFun_TB6612.h"
 Motor MotorR = Motor(18, 19, 25, 0, 1); //制御ピン18，19, PWMピン25
@@ -19,6 +21,7 @@ char rainbow[7][3] = {{255, 0, 0}, {255, 165, 0}, {255, 255, 0}, {0, 128, 0}, {0
 MPU9250 mySensor;
 float aX, aY, aZ, aSqrt, gX, gY, gZ, mDirection, mX, mY, mZ;
 
+TwoWire I2C = TwoWire(0);
 /////////////////////////BLE///////////////////////
 
 void qei_setup(pcnt_unit_t pcnt_unit, int gpioA, int gpioB)
@@ -63,8 +66,8 @@ void setup()
   Serial.begin(9600);
 
   //ENC
-  qei_setup(PCNT_UNIT_0, 34, 35);
-  qei_setup(PCNT_UNIT_1, 36, 39);
+  qei_setup(PCNT_UNIT_0, 35, 34);
+  qei_setup(PCNT_UNIT_1, 39, 36);
   pcnt_counter_resume(PCNT_UNIT_0);
   pcnt_counter_resume(PCNT_UNIT_1);
 
@@ -73,13 +76,15 @@ void setup()
 
   pixels.setBrightness(64); //0-255
 
+  delay(200);
   ///IMU
-  Wire.begin(21, 22);
+  I2C.begin(21,22,400000); // SDA, SCL
 
-  mySensor.setWire(&Wire);
+  mySensor.setWire(&I2C);
   mySensor.beginAccel();
   mySensor.beginGyro();
   mySensor.beginMag();
+  delay(200);
 }
 
 void loop()
@@ -127,12 +132,13 @@ void loop()
     Serial.print("horizontal direction: " + String(mDirection));
     Serial.print("\n");
 
+    delay(100);
+
     for (int e = 0; e < LEDNUM; e++)
     {
       pixels.setPixelColor(e, pixels.Color(rainbow[(i / 10) % 7][0], rainbow[(i / 10) % 7][1], rainbow[(i / 10) % 7][2]));
+      pixels.show();
     }
-    pixels.show();
 
-    delay(100);
   }
 }
