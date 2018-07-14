@@ -72,7 +72,7 @@ void qei_setup(pcnt_unit_t pcnt_unit, int gpioA, int gpioB)
 //////////////////////////////////////setup///////////////////////////////////////////////
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   //ENC
   qei_setup(PCNT_UNIT_0, 35, 34);
@@ -113,6 +113,18 @@ void loop()
   
   for (int i = 0; i < 1024; i++)
   {
+    
+    Serial.print("T0:");
+    Serial.print(touchRead(T0));
+    Serial.print("T1:");
+    Serial.print(touchRead(T1));
+    Serial.print("T2:");
+    Serial.print(touchRead(T2));
+    Serial.print("T3:");
+    Serial.print(touchRead(T3));
+    Serial.print("T5:");
+    Serial.print(touchRead(T5));
+    Serial.print("\t");
     /////////////battery moniter//////////////
     float vbat = ((float)analogRead(BAT_PIN)/4095)*3.3*3;
     Serial.print("vbat:");
