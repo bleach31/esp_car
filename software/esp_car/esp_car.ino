@@ -28,6 +28,9 @@ VL53L0X  tof_c;
 
 //int tof_c_xshut = 32;//GPIO32 プルアップ済み
 
+////////////////////////battery////////////////
+int BAT_PIN = 27;
+
 void qei_setup(pcnt_unit_t pcnt_unit, int gpioA, int gpioB)
 {
   pcnt_config_t pcnt_confA;
@@ -107,10 +110,25 @@ void setup()
 
 void loop()
 {
+  
   for (int i = 0; i < 1024; i++)
   {
+    /////////////battery moniter//////////////
+    float vbat = ((float)analogRead(BAT_PIN)/4095)*3.3*3;
+    Serial.print("vbat:");
+    Serial.print(vbat);
+    Serial.print("\t");
+    if(vbat < 6.0){
+      MotorL.drive(0);
+      MotorR.drive(0);
+      break;
+    }
+
     //MotorL.drive(i);     //-1023 - 0 - 1023
     //MotorR.drive(-1*i);  //-1023 - 0 - 1023
+
+
+    //////////qei/////////////
     pcnt_get_counter_value(PCNT_UNIT_0, &count_R);
     pcnt_get_counter_value(PCNT_UNIT_1, &count_L);
     Serial.print("tire lotate value:");
@@ -152,15 +170,32 @@ void loop()
     Serial.print("\n");
     */
     //////////////////////
-    Serial.println(tof_c.readRangeSingleMillimeters());
-    if (tof_c.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+    uint16_t dist_c = tof_c.readRangeSingleMillimeters();
+    Serial.print(dist_c);
+    //if (tof_c.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+    Serial.print("\t");
 
-    //////////////////////
+    //////////////////////Led
     for (int e = 0; e < LEDNUM; e++)
     {
       pixels.setPixelColor(e, pixels.Color(rainbow[(i / 10) % 7][0], rainbow[(i / 10) % 7][1], rainbow[(i / 10) % 7][2]));
       pixels.show();
     }
-    delay(200);
+    /////////////control
+    if(dist_c > 8000) //not found or timeout
+    {
+      MotorL.drive(500);
+      MotorR.drive(-500);
+    }else if(dist_c < 50 ) //near
+    {
+      MotorL.drive(0);
+      MotorR.drive(0);
+    }else{ //follow
+      MotorL.drive(dist_c/2);
+      MotorR.drive(dist_c/2);
+    }
+
+    Serial.println("");
+    delay(50);
   }
 }

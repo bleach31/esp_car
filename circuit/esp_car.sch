@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.0.0">
+<eagle version="9.0.1">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -16754,7 +16754,7 @@ GND</text>
 <instance part="C6" gate="G$1" x="146.05" y="111.76"/>
 <instance part="C8" gate="G$1" x="-104.14" y="97.79"/>
 <instance part="VDD5" gate="G$1" x="-104.14" y="114.3"/>
-<instance part="GND7" gate="1" x="-111.76" y="88.9"/>
+<instance part="GND7" gate="1" x="-129.54" y="86.36"/>
 <instance part="U$5" gate="G$1" x="-129.54" y="114.3"/>
 <instance part="U$7" gate="G$1" x="-120.65" y="114.3"/>
 <instance part="GND18" gate="1" x="-104.14" y="88.9"/>
@@ -16783,7 +16783,7 @@ GND</text>
 <instance part="LED_RL" gate="G$1" x="154.94" y="5.08"/>
 <instance part="LED_RR" gate="G$1" x="187.96" y="5.08"/>
 <instance part="LED_FR" gate="G$1" x="220.98" y="5.08"/>
-<instance part="GND12" gate="1" x="242.824" y="-2.032" rot="R90"/>
+<instance part="GND12" gate="1" x="243.84" y="-10.16" rot="R90"/>
 <instance part="P+3" gate="1" x="238.76" y="22.86" rot="R270"/>
 <instance part="GND13" gate="1" x="144.78" y="43.18"/>
 <instance part="C11" gate="G$1" x="137.16" y="17.78"/>
@@ -16914,11 +16914,9 @@ GND</text>
 <wire x1="-104.14" y1="92.71" x2="-104.14" y2="91.44" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<wire x1="-111.76" y1="100.33" x2="-111.76" y2="91.44" width="0.1524" layer="91"/>
+<wire x1="-129.54" y1="109.22" x2="-129.54" y2="88.9" width="0.1524" layer="91"/>
 <pinref part="GND7" gate="1" pin="GND"/>
 <pinref part="U$5" gate="G$1" pin="P$1"/>
-<wire x1="-111.76" y1="100.33" x2="-129.54" y2="100.33" width="0.1524" layer="91"/>
-<wire x1="-129.54" y1="100.33" x2="-129.54" y2="109.22" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <wire x1="358.14" y1="13.97" x2="358.14" y2="17.78" width="0.1524" layer="91"/>
@@ -16987,9 +16985,9 @@ GND</text>
 <wire x1="187.96" y1="-10.16" x2="170.18" y2="-10.16" width="0.1524" layer="91"/>
 <wire x1="170.18" y1="-10.16" x2="154.94" y2="-10.16" width="0.1524" layer="91"/>
 <wire x1="154.94" y1="-5.08" x2="154.94" y2="-10.16" width="0.1524" layer="91"/>
-<wire x1="240.284" y1="-2.032" x2="237.744" y2="-1.778" width="0.1524" layer="91"/>
+<wire x1="241.3" y1="-10.16" x2="236.22" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="LED_RR" gate="G$1" pin="GND"/>
-<wire x1="237.744" y1="-1.778" x2="220.98" y2="-10.16" width="0.1524" layer="91"/>
+<wire x1="236.22" y1="-10.16" x2="220.98" y2="-10.16" width="0.1524" layer="91"/>
 <wire x1="187.96" y1="-5.08" x2="187.96" y2="-10.16" width="0.1524" layer="91"/>
 <wire x1="187.96" y1="-10.16" x2="203.2" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="LED_FR" gate="G$1" pin="GND"/>
@@ -17007,9 +17005,10 @@ GND</text>
 <wire x1="203.2" y1="12.7" x2="203.2" y2="-10.16" width="0.1524" layer="91"/>
 <pinref part="C12" gate="G$1" pin="2"/>
 <wire x1="170.18" y1="12.7" x2="170.18" y2="-10.16" width="0.1524" layer="91"/>
-<junction x="237.744" y="-1.778"/>
+<junction x="236.22" y="-10.16"/>
 <pinref part="C14" gate="G$1" pin="2"/>
-<wire x1="231.14" y1="12.7" x2="237.744" y2="-1.778" width="0.1524" layer="91"/>
+<wire x1="231.14" y1="12.7" x2="236.22" y2="10.16" width="0.1524" layer="91"/>
+<wire x1="236.22" y1="10.16" x2="236.22" y2="-10.16" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <wire x1="431.8" y1="30.48" x2="431.8" y2="45.72" width="0.1524" layer="91"/>
