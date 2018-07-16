@@ -9,7 +9,7 @@ Motor MotorL = Motor(16, 17, 26, 1, 1); //制御ピン16，17, PWMピン26
 int16_t count_R = 0;
 int16_t count_L = 0;
 /////////////////////////LED///////////////////////
-#include <Adafruit_NeoPixel.h>
+#include "Adafruit_NeoPixel.h"
 #define LEDNUM 4
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(LEDNUM, 13, NEO_GRB + NEO_KHZ800);
 char rainbow[7][3] = {{255, 0, 0}, {255, 165, 0}, {255, 255, 0}, {0, 128, 0}, {0, 255, 255}, {0, 0, 255}, {128, 0, 128}};
@@ -30,7 +30,7 @@ VL53L0X  tof_c;
 
 ////////////////////////battery////////////////
 int BAT_PIN = 27;
-
+/////////////////////////BLE////////////////////
 void qei_setup(pcnt_unit_t pcnt_unit, int gpioA, int gpioB)
 {
   pcnt_config_t pcnt_confA;
@@ -126,7 +126,7 @@ void loop()
     Serial.print(touchRead(T5));
     Serial.print("\t");
     /////////////battery moniter//////////////
-    float vbat = ((float)analogRead(BAT_PIN)/4095)*3.3*3;
+    float vbat = ((float)analogRead(BAT_PIN)/4095)*((10.0+22.0)/10.0)*3.3;
     Serial.print("vbat:");
     Serial.print(vbat);
     Serial.print("\t");
@@ -188,23 +188,86 @@ void loop()
     Serial.print("\t");
 
     //////////////////////Led
+    /*
     for (int e = 0; e < LEDNUM; e++)
     {
       pixels.setPixelColor(e, pixels.Color(rainbow[(i / 10) % 7][0], rainbow[(i / 10) % 7][1], rainbow[(i / 10) % 7][2]));
       pixels.show();
     }
+    */
     /////////////control
-    if(dist_c > 8000) //not found or timeout
+    if(dist_c > 8000) // lost -> search object
     {
-      MotorL.drive(500);
-      MotorR.drive(-500);
-    }else if(dist_c < 50 ) //near
+      for (int e = 0; e < LEDNUM; e++)
+      {
+        pixels.setPixelColor(e, pixels.Color(rainbow[6][0], rainbow[6][1], rainbow[6][2]));
+        pixels.show();
+      }
+
+      //いったん右旋回
+      MotorL.drive(200);
+      MotorR.drive(-200);
+      delay(1000);
+      MotorL.drive(0);
+      MotorR.drive(0);
+      
+      for (int e = 0; e < LEDNUM; e++)
+      {
+        pixels.setPixelColor(e, pixels.Color(rainbow[5][0], rainbow[5][1], rainbow[5][2]));
+        pixels.show();
+      }
+
+      //走査しながら左旋回
+      pcnt_counter_clear(PCNT_UNIT_0);
+      pcnt_counter_clear(PCNT_UNIT_1);
+      MotorL.drive(-200);
+      MotorR.drive(200);
+      
+      uint16_t dist_min = 65535;
+      int16_t count_L_rem = 0;
+      int16_t count_R_rem = 0;
+      for (int c = 0; c < 40; c++)
+      {
+        delay(50);
+        uint16_t dist_c = tof_c.readRangeSingleMillimeters();
+        //最大距離とその時のエンコーダの値を記憶
+        if(dist_c < dist_min)
+        {
+          pcnt_get_counter_value(PCNT_UNIT_1, &count_L_rem);
+          pcnt_get_counter_value(PCNT_UNIT_0, &count_R_rem);
+        }
+      }
+
+      //エンコーダ位置まで右旋回
+      MotorL.drive(200);
+      MotorR.drive(-200);
+      while(true)
+      {
+          pcnt_get_counter_value(PCNT_UNIT_1, &count_L);
+          if(count_L_rem< count_L){
+            break;
+          }
+      }
+      
+
+    }else if(dist_c < 50 ) //near -> stop
     {
       MotorL.drive(0);
       MotorR.drive(0);
+      for (int e = 0; e < LEDNUM; e++)
+      {
+        pixels.setPixelColor(e, pixels.Color(rainbow[1][0], rainbow[1][1], rainbow[1][2]));
+        pixels.show();
+      }
     }else{ //follow
-      MotorL.drive(dist_c/2);
-      MotorR.drive(dist_c/2);
+      MotorL.drive(dist_c/2 + 50);
+      MotorR.drive(dist_c/2 + 50);
+
+      for (int e = 0; e < LEDNUM; e++)
+      {
+        pixels.setPixelColor(e, pixels.Color(rainbow[0][0], rainbow[0][1], rainbow[0][2]));
+        pixels.show();
+      }
     }
 
     Serial.println("");
