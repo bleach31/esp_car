@@ -3384,7 +3384,7 @@ design rules under a new name.</description>
 <attribute name="NAME" x="34.3926" y="54.8358" size="1.27" layer="25" rot="R270"/>
 <attribute name="SPICEPREFIX" value="R" x="33.4" y="53.8" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
-<element name="R6" library="rcl" library_urn="urn:adsk.eagle:library:334" package="R0603" package3d_urn="urn:adsk.eagle:package:23555/2" value="20k" x="33.4" y="56.8" smashed="yes" rot="R90">
+<element name="R6" library="rcl" library_urn="urn:adsk.eagle:library:334" package="R0603" package3d_urn="urn:adsk.eagle:package:23555/2" value="22k" x="33.4" y="56.8" smashed="yes" rot="R90">
 <attribute name="NAME" x="34.5892" y="59.7906" size="1.27" layer="25" rot="R180"/>
 <attribute name="SPICEPREFIX" value="R" x="33.4" y="56.8" size="1.778" layer="27" rot="R90" display="off"/>
 </element>
