@@ -93,8 +93,8 @@ void setup()
   Serial.begin(115200);
 
   //ENC
-  qei_setup_x1(PCNT_UNIT_0, 35, 34);
-  qei_setup_x1(PCNT_UNIT_1, 39, 36);
+  qei_setup_x1(PCNT_UNIT_0, 34, 35);
+  qei_setup_x1(PCNT_UNIT_1, 36, 39);
   pcnt_counter_resume(PCNT_UNIT_0);
   pcnt_counter_resume(PCNT_UNIT_1);
 
@@ -216,16 +216,16 @@ void loop()
     /////////////control
     if(dist_c > 8000) // lost -> search object
     {
-      for (int e = 0; e < LEDNUM; e++)
-      {
-        pixels.setPixelColor(e, pixels.Color(rainbow[6][0], rainbow[6][1], rainbow[6][2]));
-        pixels.show();
-      }
-
       while(true){
+        for (int e = 0; e < LEDNUM; e++)
+        {
+          pixels.setPixelColor(e, pixels.Color(rainbow[6][0], rainbow[6][1], rainbow[6][2]));
+          pixels.show();
+        }
         //走査しながら左旋回
         pcnt_counter_clear(PCNT_UNIT_0);
         pcnt_counter_clear(PCNT_UNIT_1);
+        
         MotorL.drive(-200);
         MotorR.drive(200);
         
@@ -235,14 +235,22 @@ void loop()
 
         while (true)
         {
+          Serial.print("L:");
+          Serial.print(count_L_rem);
+          Serial.print("R:");
+          Serial.println(count_R_rem);
+          
           uint16_t dist_c = tof_c.readRangeSingleMillimeters();
           //最大距離とその時のエンコーダの値を記憶
           if(dist_c < dist_min)
           {
+            dist_min = dist_c;
             pcnt_get_counter_value(PCNT_UNIT_1, &count_L_rem);
             pcnt_get_counter_value(PCNT_UNIT_0, &count_R_rem);
           }
-          if(count_R_rem > 10000) //:TODO 約1回転の値を入れるあとで。
+          
+          pcnt_get_counter_value(PCNT_UNIT_0, &count_R);
+          if(count_R > 1500) //:TODO 約1回転の値を入れるあとで。
           {
             break;
           }
@@ -260,7 +268,7 @@ void loop()
         MotorR.drive(-200);
         while(true)
         {
-            pcnt_get_counter_value(PCNT_UNIT_1, &count_R);
+            pcnt_get_counter_value(PCNT_UNIT_0, &count_R);
             if(count_R < count_R_rem){
               break;
             }
@@ -285,8 +293,8 @@ void loop()
         pixels.show();
       }
     }else{ //follow
-      MotorL.drive(dist_c/2 + 50);
-      MotorR.drive(dist_c/2 + 50);
+      MotorL.drive(dist_c/10 + 180);
+      MotorR.drive(dist_c/10 + 220);
 
       for (int e = 0; e < LEDNUM; e++)
       {
