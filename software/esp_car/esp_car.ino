@@ -31,7 +31,7 @@ VL53L0X  tof_c;
 ////////////////////////battery////////////////
 int BAT_PIN = 27;
 /////////////////////////BLE////////////////////
-void qei_setup(pcnt_unit_t pcnt_unit, int gpioA, int gpioB)
+void qei_setup_x4(pcnt_unit_t pcnt_unit, int gpioA, int gpioB)
 {
   pcnt_config_t pcnt_confA;
   pcnt_config_t pcnt_confB;
@@ -65,18 +65,36 @@ void qei_setup(pcnt_unit_t pcnt_unit, int gpioA, int gpioB)
 
   pcnt_counter_pause(pcnt_unit);
   pcnt_counter_clear(pcnt_unit);
-
-
 }
+void qei_setup_x1(pcnt_unit_t pcnt_unit, int gpioA, int gpioB)
+{
+  pcnt_config_t pcnt_confA;
 
+  pcnt_confA.unit = pcnt_unit;
+  pcnt_confA.channel = PCNT_CHANNEL_0;
+  pcnt_confA.pulse_gpio_num = gpioA;
+  pcnt_confA.ctrl_gpio_num = gpioB;
+  pcnt_confA.pos_mode = PCNT_COUNT_INC;//立ち上がりのみカウント
+  pcnt_confA.neg_mode = PCNT_COUNT_DIS;//立ち下がりはカウントしない
+  pcnt_confA.lctrl_mode = PCNT_MODE_REVERSE;//立ち上がり時にB相がHighなら逆転
+  pcnt_confA.hctrl_mode = PCNT_MODE_KEEP;
+  pcnt_confA.counter_h_lim = 32767;
+  pcnt_confA.counter_l_lim = -32768;
+
+  /* Initialize PCNT unit */
+  pcnt_unit_config(&pcnt_confA);
+
+  pcnt_counter_pause(pcnt_unit);
+  pcnt_counter_clear(pcnt_unit);
+}
 //////////////////////////////////////setup///////////////////////////////////////////////
 void setup()
 {
   Serial.begin(115200);
 
   //ENC
-  qei_setup(PCNT_UNIT_0, 35, 34);
-  qei_setup(PCNT_UNIT_1, 39, 36);
+  qei_setup_x1(PCNT_UNIT_0, 35, 34);
+  qei_setup_x1(PCNT_UNIT_1, 39, 36);
   pcnt_counter_resume(PCNT_UNIT_0);
   pcnt_counter_resume(PCNT_UNIT_1);
 
@@ -204,50 +222,57 @@ void loop()
         pixels.show();
       }
 
-      //いったん右旋回
-      MotorL.drive(200);
-      MotorR.drive(-200);
-      delay(1000);
-      MotorL.drive(0);
-      MotorR.drive(0);
-      
-      for (int e = 0; e < LEDNUM; e++)
-      {
-        pixels.setPixelColor(e, pixels.Color(rainbow[5][0], rainbow[5][1], rainbow[5][2]));
-        pixels.show();
-      }
+      while(true){
+        //走査しながら左旋回
+        pcnt_counter_clear(PCNT_UNIT_0);
+        pcnt_counter_clear(PCNT_UNIT_1);
+        MotorL.drive(-200);
+        MotorR.drive(200);
+        
+        uint16_t dist_min = 65535;
+        int16_t count_L_rem = 0;
+        int16_t count_R_rem = 0;
 
-      //走査しながら左旋回
-      pcnt_counter_clear(PCNT_UNIT_0);
-      pcnt_counter_clear(PCNT_UNIT_1);
-      MotorL.drive(-200);
-      MotorR.drive(200);
-      
-      uint16_t dist_min = 65535;
-      int16_t count_L_rem = 0;
-      int16_t count_R_rem = 0;
-      for (int c = 0; c < 40; c++)
-      {
-        delay(50);
-        uint16_t dist_c = tof_c.readRangeSingleMillimeters();
-        //最大距離とその時のエンコーダの値を記憶
-        if(dist_c < dist_min)
+        while (true)
         {
-          pcnt_get_counter_value(PCNT_UNIT_1, &count_L_rem);
-          pcnt_get_counter_value(PCNT_UNIT_0, &count_R_rem);
+          uint16_t dist_c = tof_c.readRangeSingleMillimeters();
+          //最大距離とその時のエンコーダの値を記憶
+          if(dist_c < dist_min)
+          {
+            pcnt_get_counter_value(PCNT_UNIT_1, &count_L_rem);
+            pcnt_get_counter_value(PCNT_UNIT_0, &count_R_rem);
+          }
+          if(count_R_rem > 10000) //:TODO 約1回転の値を入れるあとで。
+          {
+            break;
+          }
+          delay(10);
         }
-      }
 
-      //エンコーダ位置まで右旋回
-      MotorL.drive(200);
-      MotorR.drive(-200);
-      while(true)
-      {
-          pcnt_get_counter_value(PCNT_UNIT_1, &count_L);
-          if(count_L_rem< count_L){
+        for (int e = 0; e < LEDNUM; e++)
+        {
+          pixels.setPixelColor(e, pixels.Color(rainbow[5][0], rainbow[5][1], rainbow[5][2]));
+          pixels.show();
+        }
+
+        //記憶した位置まで右旋回して戻る
+        MotorL.drive(200);
+        MotorR.drive(-200);
+        while(true)
+        {
+            pcnt_get_counter_value(PCNT_UNIT_1, &count_R);
+            if(count_R < count_R_rem){
+              break;
+            }
+        }
+        //距離を確認して記憶した最小値＋50mmに物体があれば抜け、だめなら再試行
+          uint16_t dist_c = tof_c.readRangeSingleMillimeters();
+          if(dist_c < (dist_min + 50))
+          {
             break;
           }
       }
+      
       
 
     }else if(dist_c < 50 ) //near -> stop
