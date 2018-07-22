@@ -53,6 +53,7 @@ void Motor::fwd(int speed)
    digitalWrite(In1, HIGH);
    digitalWrite(In2, LOW);
    //analogWrite(PWM, speed);
+  if (speed>1023) speed = 1023;
    ledcWrite(Channel, speed); //0-1023
 
 }
@@ -62,6 +63,8 @@ void Motor::rev(int speed)
    digitalWrite(In1, LOW);
    digitalWrite(In2, HIGH);
    //analogWrite(PWM, speed);
+   
+  if (speed>1023) speed = 1023;
    ledcWrite(Channel, speed);
 }
 

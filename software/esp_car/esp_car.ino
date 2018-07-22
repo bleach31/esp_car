@@ -3,7 +3,9 @@
 #include "SparkFun_TB6612.h"
 Motor MotorR = Motor(18, 19, 25, 0, 1); //制御ピン18，19, PWMピン25
 Motor MotorL = Motor(16, 17, 26, 1, 1); //制御ピン16，17, PWMピン26
-
+//制御用目標値RPM　－９０～９０ぐらい
+double rpm_trg_L = 0;
+double rpm_trg_R = 0; 
 /////////////////////////LED///////////////////////
 #include "Adafruit_NeoPixel.h"
 #define LEDNUM 4
@@ -27,7 +29,7 @@ VL53L0X tof_c;
 
 ////////////////////////battery////////////////
 int BAT_PIN = 27;
-
+float vbat;
 ////////////////////////Touch/////////////////
 uint8_t touchThr = 20;
 enum Mode
@@ -40,8 +42,8 @@ enum Mode mode = DEBUG;
 bool touch2detected = false;
 void gotTouch0()
 {
-  MotorL.drive(0);
-  MotorR.drive(0);
+  rpm_trg_L = 0;
+  rpm_trg_R = 0; 
   pixels.clear();
   pixels.setPixelColor(0, pixels.Color(rainbow[1][0], rainbow[1][1], rainbow[1][2]));
   pixels.show();
@@ -53,7 +55,10 @@ void gotTouch2()
   mode = FOLLOW;
 }
 
-void gotTouch3() {}
+void gotTouch3() {
+  rpm_trg_L = 100;
+  rpm_trg_R = -100; 
+}
 
 void gotTouch5()
 {
@@ -65,19 +70,23 @@ double rpm_L = 0;
 double rpm_R = 0;
 hw_timer_t *timer = NULL;
 TaskHandle_t th[2];
-//////////////////////////setup///////////////////////////////////////////////
+//
+
+//////////////////////////setup/////////////////////
+
 void setup()
 {
   Serial.begin(115200);
 
   //RPM
-  qei_setup_x4(PCNT_UNIT_0, 34, 35); //LEFT
-  qei_setup_x4(PCNT_UNIT_1, 36, 39); //RIGHT
+  qei_setup_x4(PCNT_UNIT_0, 35, 34); //LEFT
+  qei_setup_x4(PCNT_UNIT_1, 39, 36); //RIGHT
 
-  qei_setup_x1(PCNT_UNIT_2, 34, 35);
-  qei_setup_x1(PCNT_UNIT_3, 36, 39);
+  qei_setup_x1(PCNT_UNIT_2, 35, 34);
+  qei_setup_x1(PCNT_UNIT_3, 39, 36);
   //タイマー
   timer = timerBegin(0, 80, true); //80分周で1usec
+
   //制御
   xTaskCreatePinnedToCore(loop2,"loop2", 4096, NULL, 3, &th[0], 0); //core0でloop2を実行,優先度3
 
@@ -116,7 +125,6 @@ void setup()
 
 void loop()
 {
-  butterycheck();
 
   switch (mode)
   {
@@ -135,54 +143,81 @@ void loop()
 
   delay(20);
 }
+//制御、定期センシング用
+
 void loop2(void *pvParameters)
 {
+  uint8_t c = 0;
   while (true)
   {
-    uint64_t time_now = timerRead(timer) / 1000;
-    int16_t count_L;
-    int16_t count_R;
+    
+    Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
 
-    pcnt_get_counter_value(PCNT_UNIT_0, &count_L);
-    pcnt_get_counter_value(PCNT_UNIT_1, &count_R);
-
-    rpm_L = (double)(count_L) / (double)time_now;
-    rpm_R = (double)(count_R) / (double)time_now;
-
-    //タイマーとカウンターのリセット
-    timer = timerBegin(0, 80, true); //80分周で1usec
-    pcnt_counter_clear(PCNT_UNIT_0);
-    pcnt_counter_clear(PCNT_UNIT_1);
-
-    Serial.print("\t\t\t\t\t\t\t\t\t\t  RPM L:");
-    Serial.print(rpm_L);
-    Serial.print(" R:");
-    Serial.println(rpm_R);
-
-    vTaskDelay(100);
-  }
-}
-
-void butterycheck()
-{
-  float vbat = ((float)analogRead(BAT_PIN) / 4095) * ((10.0 + 22.0) / 10.0) * 3.3;
-  Serial.print("vbat:");
-  Serial.print(vbat);
-  Serial.print("\t");
-
-  if (vbat < 6.0)
-  {
-    MotorL.drive(0);
-    MotorR.drive(0);
-    while (1)
+    if(-1 < rpm_trg_L && rpm_trg_L < 1)
     {
-      Serial.print("Low battery");
-      delay(10000);
+      MotorL.brake(); 
+    }else
+    {
+      int16_t duty_L = rpm_trg_L * 10 + (rpm_trg_L - rpm_L)*1.0;
+      Serial.print(" duty_L:");
+      Serial.print(duty_L);
+      Serial.print(" rpm_trg_L:");
+      Serial.print(rpm_trg_L);
+      Serial.print(" rpm_L:");
+      Serial.print(rpm_L);
+
+      MotorL.drive(duty_L);
     }
 
-    Serial.println("");
+    if(-1 < rpm_trg_R && rpm_trg_R < 1)
+    {
+      MotorR.brake(); 
+    }else
+    {
+      int16_t duty_R = rpm_trg_R * 10 + (rpm_trg_R - rpm_R)*1.0;
+      Serial.print(" duty_R:");
+      Serial.print(duty_R);
+      MotorR.drive(duty_R);
+    }
+
+    
+    if(c >= 10){
+      //RPM
+      uint64_t time_now;
+      int16_t count_L;
+      int16_t count_R;
+
+      time_now = timerRead(timer);
+      pcnt_get_counter_value(PCNT_UNIT_0, &count_L);
+      pcnt_get_counter_value(PCNT_UNIT_1, &count_R);
+
+      rpm_L = (double)(count_L) / ((double)time_now/10000.0);
+      rpm_R = (double)(count_R) / ((double)time_now/10000.0);
+
+      //タイマーとカウンターのリセット
+      timer = timerBegin(0, 80, true); //80分周で1usec
+      pcnt_counter_clear(PCNT_UNIT_0);
+      pcnt_counter_clear(PCNT_UNIT_1);
+
+      Serial.print("RPM L:");
+      Serial.print(rpm_L);
+      Serial.print(" R:");
+      Serial.print(rpm_R);
+
+      //バッテリー値
+      vbat = ((float)analogRead(BAT_PIN) / 4095) * ((35.0) / 10.0) * 3.3;//35/10はは抵抗値の適合後の値
+      Serial.print(" vbat:");
+      Serial.print(vbat);
+
+      c = 0;
+    }
+      Serial.println("");
+    c++;
+    vTaskDelay(10);
   }
 }
+
+
 void debug()
 {
   Serial.print(" T0:");
@@ -197,8 +232,8 @@ void debug()
 
   //////////qei/////////////
 
-    int16_t count_L;
-    int16_t count_R;
+  int16_t count_L;
+  int16_t count_R;
   pcnt_get_counter_value(PCNT_UNIT_2, &count_L);
   pcnt_get_counter_value(PCNT_UNIT_3, &count_R);
 
@@ -274,8 +309,8 @@ void following()
       pcnt_counter_clear(PCNT_UNIT_2);
       pcnt_counter_clear(PCNT_UNIT_3);
 
-      MotorL.drive(-200);
-      MotorR.drive(200);
+      rpm_trg_L = -20;
+      rpm_trg_R = 20; 
 
       uint16_t dist_min = 65535;
       int16_t count_L_rem = 0;
@@ -312,8 +347,8 @@ void following()
       }
 
       //記憶した位置まで右旋回して戻る
-      MotorL.drive(200);
-      MotorR.drive(-200);
+      rpm_trg_L = 20;
+      rpm_trg_R = -20; 
       while (true)
       {
         pcnt_get_counter_value(PCNT_UNIT_3, &count_R);
@@ -332,8 +367,8 @@ void following()
   }
   else if (dist_c < 50) //near -> stop
   {
-    MotorL.drive(0);
-    MotorR.drive(0);
+    rpm_trg_L = 0;
+    rpm_trg_R = 0; 
     for (int e = 0; e < LEDNUM; e++)
     {
       pixels.setPixelColor(e, pixels.Color(rainbow[1][0], rainbow[1][1], rainbow[1][2]));
@@ -342,8 +377,10 @@ void following()
   }
   else
   { //follow
-    MotorL.drive(dist_c / 10 + 180);
-    MotorR.drive(dist_c / 10 + 240);
+  
+    //distが最大2000なので目標値が20~60　rpmぐらい。
+    rpm_trg_L = dist_c / 50 + 20;
+    rpm_trg_R = dist_c / 50 + 20; 
 
     for (int e = 0; e < LEDNUM; e++)
     {
