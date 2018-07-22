@@ -13,6 +13,14 @@ Cuddling Alexa
 #### parts memo
 - 100kオーム 1608 http://akizukidenshi.com/catalog/g/gR-11792/
 - 5v 1a 縦型　 http://akizukidenshi.com/catalog/g/gI-00537/
+    http://akizukidenshi.com/catalog/g/gM-13536/
+    発熱がひどかったのでこっちに変更。6.5vから使えて最大1A、効率90-94%
+
+    3.3V系統もBLEを使うと結構やばい。
+    http://akizukidenshi.com/catalog/g/gM-13535/で設計すればよかった。
+    
+    回路設計時は入手性がよくてリポ2セル(最低6.4v)で動くスイッチングレギュレータ見つけられなかった・・・。
+
 - 電源用mosfet http://akizukidenshi.com/catalog/g/gI-03942/
 - 47uF http://akizukidenshi.com/catalog/g/gP-04657/
 - 100uF http://akizukidenshi.com/catalog/g/gP-08290/
