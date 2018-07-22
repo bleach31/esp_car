@@ -153,19 +153,13 @@ void loop2(void *pvParameters)
     
     Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
 
+    //制御　FF　+　P制御
     if(-1 < rpm_trg_L && rpm_trg_L < 1)
     {
       MotorL.brake(); 
     }else
     {
       int16_t duty_L = rpm_trg_L * 10 + (rpm_trg_L - rpm_L)*1.0;
-      Serial.print(" duty_L:");
-      Serial.print(duty_L);
-      Serial.print(" rpm_trg_L:");
-      Serial.print(rpm_trg_L);
-      Serial.print(" rpm_L:");
-      Serial.print(rpm_L);
-
       MotorL.drive(duty_L);
     }
 
@@ -175,8 +169,6 @@ void loop2(void *pvParameters)
     }else
     {
       int16_t duty_R = rpm_trg_R * 10 + (rpm_trg_R - rpm_R)*1.0;
-      Serial.print(" duty_R:");
-      Serial.print(duty_R);
       MotorR.drive(duty_R);
     }
 
