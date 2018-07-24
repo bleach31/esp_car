@@ -34,8 +34,8 @@ VL53L0X tof_c;
 //int tof_c_xshut = 32;//GPIO32 とりあえず1個運用
 
 ////////////////////////battery////////////////
-int BAT_PIN = GPIO_NUM_27;
-float vbat;
+int BAT_PIN = GPIO_NUM_33;
+double vbat;
 
 ///////////////////////ENC/////////////////////
 #include "qei.hpp"
@@ -53,6 +53,7 @@ uint8_t touchThr = 20;
 #include <BLEUtils.h>
 #include <BLE2902.h>
 
+#include <string.h>
 
 BLEServer *pServer = NULL;
 BLECharacteristic * pTxCharacteristic;
@@ -73,19 +74,18 @@ class MyServerCallbacks : public BLEServerCallbacks {
 		deviceConnected = false;
 	}
 };
-
+#include <string.h>
 class MyCallbacks : public BLECharacteristicCallbacks {
 	void onWrite(BLECharacteristic *pCharacteristic) {
+		//String rxValue = pCharacteristic->getValue();
 		std::string rxValue = pCharacteristic->getValue();
 
 		if (rxValue.length() > 0) {
-			Serial.println("*********");
 			Serial.print("Received Value: ");
 			for (int i = 0; i < rxValue.length(); i++)
 				Serial.print(rxValue[i]);
 
 			Serial.println();
-			Serial.println("*********");
 		}
 	}
 };
@@ -149,37 +149,11 @@ void gotTouch5()
 		pixels.show();
 
 
-		// Create the BLE Device
-		BLEDevice::init("UART Service");
-
-		// Create the BLE Server
-		pServer = BLEDevice::createServer();
-		pServer->setCallbacks(new MyServerCallbacks());
-
-		// Create the BLE Service
-		BLEService *pService = pServer->createService(SERVICE_UUID);
-
-		// Create a BLE Characteristic
-		pTxCharacteristic = pService->createCharacteristic(
-			CHARACTERISTIC_UUID_TX,
-			BLECharacteristic::PROPERTY_NOTIFY
-		);
-
-		pTxCharacteristic->addDescriptor(new BLE2902());
-
-		BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
-			CHARACTERISTIC_UUID_RX,
-			BLECharacteristic::PROPERTY_WRITE
-		);
-
-		pRxCharacteristic->setCallbacks(new MyCallbacks());
-
-		// Start the service
-		pService->start();
-
 		// Start advertising
 		pServer->getAdvertising()->start();
 		Serial.println("Waiting a client connection to notify...");
+
+
 	}
 }
 
@@ -206,10 +180,10 @@ void setup()
 
 	//LED
 	pixels.begin(); // This initializes the NeoPixel library.
+	pixels.setBrightness(128); //0-255
+	pixels.clear();
+	pixels.setPixelColor(0, red);
 
-	pixels.setBrightness(64); //0-255
-
-	delay(200);
 	///IMU
 	I2C.begin(GPIO_NUM_21, GPIO_NUM_22, 400000); // SDA, SCL
 
@@ -217,7 +191,6 @@ void setup()
 	mpu.beginAccel();
 	mpu.beginGyro();
 	mpu.beginMag();
-	delay(200);
 
 	//ToF
 	tof_c.setWire(&I2C);
@@ -235,6 +208,34 @@ void setup()
 	touchAttachInterrupt(T2, gotTouch2, touchThr);
 	touchAttachInterrupt(T3, gotTouch3, touchThr);
 	touchAttachInterrupt(T5, gotTouch5, touchThr);
+	// Create the BLE Device
+	BLEDevice::init("UART Service");
+
+	// Create the BLE Server
+	pServer = BLEDevice::createServer();
+	pServer->setCallbacks(new MyServerCallbacks());
+
+	// Create the BLE Service
+	BLEService *pService = pServer->createService(SERVICE_UUID);
+
+	// Create a BLE Characteristic
+	pTxCharacteristic = pService->createCharacteristic(
+		CHARACTERISTIC_UUID_TX,
+		BLECharacteristic::PROPERTY_NOTIFY
+	);
+
+	pTxCharacteristic->addDescriptor(new BLE2902());
+
+	BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
+		CHARACTERISTIC_UUID_RX,
+		BLECharacteristic::PROPERTY_WRITE
+	);
+
+	pRxCharacteristic->setCallbacks(new MyCallbacks());
+
+	// Start the service
+	pService->start();
+
 }
 
 void loop()
@@ -294,7 +295,7 @@ void loop_slow(void *pvParameters)
 		*/
 
 		//バッテリー値
-		vbat = ((float)analogRead(BAT_PIN) / 4095) * ((35.0) / 10.0) * 3.3;//35/10はは抵抗値の適合後の値
+		vbat = ((double)analogRead(BAT_PIN) / 4095) * ((35.0) / 10.0) * 3.3;//35/10はは抵抗値の適合後の値
 		if (vbat < 6.0) {
 			rpm_trg_L = 0;
 			rpm_trg_R = 0;
@@ -311,8 +312,8 @@ void loop_slow(void *pvParameters)
 			esp_deep_sleep_start(); // スリープモード実行（Wakeupオプションなし＝外部リセットまで）
 
 		}
-		//Serial.print(" vbat:");
-		//Serial.print(vbat);
+		Serial.print(" vbat:");
+		Serial.print(vbat);
 
 		// Wait for the next cycle.
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -338,7 +339,16 @@ void loop_fast(void *pvParameters)
 		{
 			//90rpmで8vぐらい。＋FB誤差補正
 			double trg_v = rpm_trg_L * 0.09 + (rpm_trg_L - rpm_L)*0.009;
-			MotorL.drive(((int)trg_v/vbat));
+			MotorL.drive(((int)((trg_v * 1000) /vbat)));
+			/*
+			Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t");
+			Serial.print(rpm_trg_L);
+			Serial.print("\t");
+			Serial.print(trg_v);
+			Serial.print("\t");
+			Serial.print(((int)((trg_v*1000) / vbat)));
+			Serial.println("");
+			*/
 		}
 
 		if (-1 < rpm_trg_R && rpm_trg_R < 1)
@@ -347,8 +357,8 @@ void loop_fast(void *pvParameters)
 		}
 		else
 		{
-			double trg_v = rpm_trg_R * 0.09 + (rpm_trg_R - rpm_R)*0.009;
-			MotorR.drive(((int)trg_v / vbat));
+			double trg_v = rpm_trg_R * 0.1 + (rpm_trg_R - rpm_R)*0.009;
+			MotorR.drive(((int)((trg_v * 1000) / vbat)));
 		}
 
 		// Wait for the next cycle.
