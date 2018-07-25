@@ -62,8 +62,8 @@ bool oldDeviceConnected = false;
 uint8_t txValue = 0;
 
 #define SERVICE_UUID           "8ff3d648-3ce2-4013-874a-4162cd85300d" // UART service UUID
-#define CHARACTERISTIC_UUID_RX "dd673cd0-24bf-4421-95d5-67bb3ab1f3d6"
-#define CHARACTERISTIC_UUID_TX "f35a5414-d140-447b-90e9-3e0263ac7a05"
+#define CHARACTERISTIC_UUID_RX "f35a5414-d140-447b-90e9-3e0263ac7a05"
+#define CHARACTERISTIC_UUID_TX "dd673cd0-24bf-4421-95d5-67bb3ab1f3d6"
 
 class MyServerCallbacks : public BLEServerCallbacks {
 	void onConnect(BLEServer* pServer) {
@@ -74,46 +74,38 @@ class MyServerCallbacks : public BLEServerCallbacks {
 		deviceConnected = false;
 	}
 };
-#include <string>
 class MyCallbacks : public BLECharacteristicCallbacks {
 	void onWrite(BLECharacteristic *pCharacteristic) {
 		//String rxValue = pCharacteristic->getValue();
 		std::string rxValue = pCharacteristic->getValue();
 
-		int sep = rxValue.find(",");
-		const char* xChar = rxValue.substr(0,sep-1).c_str();
-		const char* yChar = rxValue.substr(sep+1,rxValue.length()).c_str();
-		
-		/*
-		int sep = rxValue.indexOf(",");
-		String xStr = rxValue.substring(0,sep-1);
-		String yStr = rxValue.substring(sep+1,rxValue.length());
-		*/
-
-		//float x = xStr.toFloat();
-		//float y = yStr.toFloat();
-		
-		//int x = std::stoi(xStr);
-		//int y = std::stoi(yStr);
-		float x = strtof(xChar, NULL);
-		float y = strtof(yChar, NULL);
-
-		Serial.print(" x:");
-		Serial.print(x);
-		Serial.print(" y:");
-		Serial.print(y);
-
-		/*
 		if (rxValue.length() > 0) {
-			Serial.print("Received Value: ");
-			for (int i = 0; i < rxValue.length(); i++)
-			{
-				Serial.print(rxValue[i]);
 
-			}
-			Serial.println();
+			
+			int sep = rxValue.find(",");
+			const char* xChar = rxValue.substr(0, sep - 1).c_str();
+			const char* yChar = rxValue.substr(sep + 1, rxValue.length()).c_str();
+
+			float x = strtof(xChar, NULL);
+			float y = strtof(yChar, NULL);
+			
+			//不感帯
+			if (-1 < x && x < 1)
+				x = 0;
+			if (-1 < y && y < 1)
+				y = 0;
+
+			rpm_trg_L = y * -10 + x * -10;
+			rpm_trg_R = y * -10 + x * 10;
+			/*
+			Serial.print(" x:");
+			Serial.print(x);
+			Serial.print(" y:");
+			Serial.print(y)
+			Serial.println("");
+			*/
+
 		}
-		*/
 	}
 };
 
@@ -122,66 +114,29 @@ enum Mode
 {
 	DEBUG,
 	FOLLOW,
-	RC
+	RC,
+	INIT
 };
 enum Mode mode = DEBUG;
+enum Mode pre_mode = INIT;
 bool touch2detected = false;
 void gotTouch0()
 {
-	if (mode != DEBUG) {
-		mode = DEBUG;
-
-		btStop();
-		rpm_trg_L = 0;
-		rpm_trg_R = 0;
-		pixels.clear();
-
-		pixels.setPixelColor(0, red);
-		pixels.show();
-	}
-
+	mode = DEBUG;
 }
 void gotTouch2()
 {
-	if (mode != FOLLOW)
-	{
-		mode = FOLLOW;
-
-		btStop();
-		rpm_trg_L = 0;
-		rpm_trg_R = 0;
-		pixels.clear();
-	}
 
 }
 
-void gotTouch3() {
-	btStop();
-	rpm_trg_L = 0;
-	rpm_trg_R = 0;
-	pixels.clear();
+void gotTouch3() 
+{
+	mode = RC;
 }
 
 void gotTouch5()
 {
-	btStop();
-	rpm_trg_L = 0;
-	rpm_trg_R = 0;
-	pixels.clear();
-
-	if (mode != RC)
-	{
-		mode = RC;
-		pixels.setPixelColor(2, blue);
-		pixels.show();
-
-
-		// Start advertising
-		pServer->getAdvertising()->start();
-		Serial.println("Waiting a client connection to notify...");
-
-
-	}
+	mode = FOLLOW;
 }
 
 //////////////////////////setup/////////////////////
@@ -207,11 +162,11 @@ void setup()
 
 	//LED
 	pixels.begin(); // This initializes the NeoPixel library.
-	pixels.setBrightness(128); //0-255
+	pixels.setBrightness(32); //0-255
 	pixels.clear();
 	pixels.setPixelColor(0, red);
 
-	///IMU
+	//IMU
 	I2C.begin(GPIO_NUM_21, GPIO_NUM_22, 400000); // SDA, SCL
 
 	mpu.setWire(&I2C);
@@ -235,54 +190,88 @@ void setup()
 	touchAttachInterrupt(T2, gotTouch2, touchThr);
 	touchAttachInterrupt(T3, gotTouch3, touchThr);
 	touchAttachInterrupt(T5, gotTouch5, touchThr);
-	// Create the BLE Device
-	BLEDevice::init("UART Service");
-
-	// Create the BLE Server
-	pServer = BLEDevice::createServer();
-	pServer->setCallbacks(new MyServerCallbacks());
-
-	// Create the BLE Service
-	BLEService *pService = pServer->createService(SERVICE_UUID);
-
-	// Create a BLE Characteristic
-	pTxCharacteristic = pService->createCharacteristic(
-		CHARACTERISTIC_UUID_TX,
-		BLECharacteristic::PROPERTY_NOTIFY
-	);
-
-	pTxCharacteristic->addDescriptor(new BLE2902());
-
-	BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
-		CHARACTERISTIC_UUID_RX,
-		BLECharacteristic::PROPERTY_WRITE
-	);
-
-	pRxCharacteristic->setCallbacks(new MyCallbacks());
-
-	// Start the service
-	pService->start();
 
 }
 
 void loop()
 {
 
+	//モードごとの定期処理
 	switch (mode)
 	{
 	case DEBUG:
 		debug();
 		break;
 	case FOLLOW:
+		//呼び出し関数内部でループする場合,while(mode == {xxx})とし、モード変更時に抜けられるようにする
 		following();
 		break;
 	case RC:
-		break;
+		{
+			// disconnecting
+			if (!deviceConnected && oldDeviceConnected) {
+				rpm_trg_L = 0;
+				rpm_trg_R = 0;
+				pixels.clear();
+				pixels.setPixelColor(0, blue);
+				pixels.show();
+				delay(500); // give the bluetooth stack the chance to get things ready
+				pServer->startAdvertising(); // restart advertising
+				Serial.println("restart advertising");
+				oldDeviceConnected = deviceConnected;
+			}
+			// connecting
+			if (deviceConnected && !oldDeviceConnected) {
+				for (int e = 0; e < LEDNUM; e++)
+				{
+					pixels.setPixelColor(e, blue);
+					pixels.show();
+				}
+				// do stuff here on connecting
+				oldDeviceConnected = deviceConnected;
+			}
+			break;
+		}
 
 	default:
 		break;
 	}
 
+	//モードごとの初期化処理
+	if (pre_mode != mode)
+	{
+		// BLEラジコンから抜けるときは強制リセット。　↓がCLOSEされるまで。
+		//		Dynamically Start Restart Bluetooth(BLE) · Issue #351 · nkolban / esp32 - snippets https ://github.com/nkolban/esp32-snippets/issues/351
+		if (pre_mode == RC)
+		{
+			ESP.restart();
+		}
+
+		rpm_trg_L = 0;
+		rpm_trg_R = 0;
+		pixels.clear();
+		switch (mode)
+		{
+		case DEBUG:
+			pixels.setPixelColor(0, orange);
+			pixels.show();
+			break;
+		case FOLLOW:
+			break;
+		case RC:
+			{
+				pixels.setPixelColor(0, blue);
+				pixels.show();
+				ble_setup();
+				break;
+			}
+
+		default:
+			break;
+		}
+	}
+
+	pre_mode = mode;
 	delay(20);
 }
 
@@ -339,9 +328,6 @@ void loop_slow(void *pvParameters)
 			esp_deep_sleep_start(); // スリープモード実行（Wakeupオプションなし＝外部リセットまで）
 
 		}
-		Serial.print(" vbat:");
-		Serial.print(vbat);
-
 		// Wait for the next cycle.
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
@@ -365,12 +351,10 @@ void loop_fast(void *pvParameters)
 		else
 		{
 			//90rpmで8vぐらい。＋FB誤差補正
-			double trg_v = rpm_trg_L * 0.09 + (rpm_trg_L - rpm_L)*0.009;
+			double trg_v = rpm_trg_L * 0.09 + (rpm_trg_L - rpm_L)*0.01;
 			MotorL.drive(((int)((trg_v * 1000) /vbat)));
 			/*
 			Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t");
-			Serial.print(rpm_trg_L);
-			Serial.print("\t");
 			Serial.print(trg_v);
 			Serial.print("\t");
 			Serial.print(((int)((trg_v*1000) / vbat)));
@@ -384,7 +368,7 @@ void loop_fast(void *pvParameters)
 		}
 		else
 		{
-			double trg_v = rpm_trg_R * 0.1 + (rpm_trg_R - rpm_R)*0.009;
+			double trg_v = rpm_trg_R * 0.10 + (rpm_trg_R - rpm_R)*0.01;
 			MotorR.drive(((int)((trg_v * 1000) / vbat)));
 		}
 
@@ -396,85 +380,83 @@ void loop_fast(void *pvParameters)
 
 void debug()
 {
+	Serial.print("TrgRPM L:");
+	Serial.print(rpm_trg_L);
+	Serial.print(" R:");
+	Serial.print(rpm_trg_R);
+
 	Serial.print(" T0:");
 	Serial.print(touchRead(T0));
+	Serial.print(" T1:");
+	Serial.print(touchRead(T1));
 	Serial.print(" T2:");
 	Serial.print(touchRead(T2));
 	Serial.print(" T3:");
 	Serial.print(touchRead(T3));
 	Serial.print(" T5:");
 	Serial.print(touchRead(T5));
-	Serial.print("\t");
-
-	//////////qei/////////////
 
 	int16_t count_L;
 	int16_t count_R;
 	pcnt_get_counter_value(PCNT_UNIT_2, &count_L);
 	pcnt_get_counter_value(PCNT_UNIT_3, &count_R);
 
-	Serial.print("Pulse L:");
+	Serial.print(" Pulse L:");
 	Serial.print(count_L);
 	Serial.print(" R:");
 	Serial.print(count_R);
-	Serial.print("\t");
-
+	Serial.print(" ");
 	/*
-	  mpu.accelUpdate();
-	  aX = mpu.accelX();
-	  aY = mpu.accelY();
-	  aZ = mpu.accelZ();
-	  aSqrt = mpu.accelSqrt();
-	  Serial.print("accelX: " + String(aX));
-	  Serial.print("accelY: " + String(aY));
-	  Serial.print("accelZ: " + String(aZ))
-	  Serial.print("accelSqrt: " + String(aSqrt));
-	  Serial.print("\t");
+	mpu.accelUpdate();
+	aX = mpu.accelX();
+	aY = mpu.accelY();
+	aZ = mpu.accelZ();
+	aSqrt = mpu.accelSqrt();
+	Serial.print(" accelX: " + String(aX) + " accelY: " + String(aY) + " accelZ: " + String(aZ));
+	Serial.print(" accelSqrt: " + String(aSqrt));
+	Serial.print(" ");
 
-	  mpu.gyroUpdate();
-	  gX = mpu.gyroX();
-	  gY = mpu.gyroY();
-	  gZ = mpu.gyroZ();
-	  Serial.print("gyroX: " + String(gX));
-	  Serial.print("gyroY: " + String(gY));
-	  Serial.print("gyroZ: " + String(gZ));
-	  Serial.print("\t");
+	mpu.gyroUpdate();
+	gX = mpu.gyroX();
+	gY = mpu.gyroY();
+	gZ = mpu.gyroZ();
+	Serial.print(" gyroX: " + String(gX) + " gyroY: " + String(gY) + " gyroZ: " + String(gZ));
+	Serial.print(" ");
 
-	  mpu.magUpdate();
-	  mX = mpu.magX();
-	  mY = mpu.magY();
-	  mZ = mpu.magZ();
-	  mDirection = mpu.magHorizDirection();
-	  Serial.print("magX: " + String(mX));
-	  Serial.print("maxY: " + String(mY));
-	  Serial.print("magZ: " + String(mZ));
-	  Serial.print("horizontal direction: " + String(mDirection));
-	  Serial.print("\n");
-	  */
+	mpu.magUpdate();
+	mX = mpu.magX();
+	mY = mpu.magY();
+	mZ = mpu.magZ();
+	mDirection = mpu.magHorizDirection();
+	Serial.print(" magX: " + String(mX) + " maxY: " + String(mY) +" magZ: " + String(mZ));
+	Serial.print("horizontal direction: " + String(mDirection));
+	*/
 
-	  //////////////////////Led
-	  /*
-		for (int e = 0; e < LEDNUM; e++)
-		{
-		  pixels.setPixelColor(e, pixels.Color(rainbow[1][0], rainbow[1][1], rainbow[1][2]));
-		  pixels.show();
-		}
-		*/
+	uint16_t dist_c = tof_c.readRangeSingleMillimeters();
+	Serial.print(" dist:");
+	Serial.print(dist_c);
+
+	Serial.print(" vbat:");
+	Serial.print(vbat);
 
 	Serial.println("");
 }
 
+uint8_t lost_flag=2^4;
 void following()
 {
 	//////////////////////距離取得
 	uint16_t dist_c = tof_c.readRangeSingleMillimeters();
-	Serial.print(dist_c);
 	//if (tof_c.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
 
 
+	Serial.print(" dist:");
+	Serial.println(dist_c);
 	if (dist_c > 8000) // lost -> search object
 	{
-		while (true)
+		lost_flag /=2;//5以上割ったら0
+
+		while (mode == FOLLOW && lost_flag <= 0)//5連続でロスト判定
 		{
 			//走査しながら左旋回
 			pcnt_counter_clear(PCNT_UNIT_2);
@@ -493,7 +475,7 @@ void following()
 			int16_t count_R_rem = 0;
 			int16_t count_R = 0;
 
-			while (true)
+			while (mode == FOLLOW)
 			{
 				Serial.print("L:");
 				Serial.print(count_L_rem);
@@ -513,7 +495,7 @@ void following()
 				{
 					break;
 				}
-				delay(10);
+				delay(1);
 			}
 
 			for (int e = 0; e < LEDNUM; e++)
@@ -525,17 +507,18 @@ void following()
 			//記憶した位置まで右旋回して戻る
 			rpm_trg_L = 20;
 			rpm_trg_R = -20;
-			while (true)
+			while (mode == FOLLOW)
 			{
 				pcnt_get_counter_value(PCNT_UNIT_3, &count_R);
 				if (count_R < count_R_rem)
 				{
 					break;
 				}
+				delay(1);
 			}
-			//距離を確認して記憶した最小値＋50mmに物体があれば抜け、だめなら再試行
+			//距離を確認して記憶した最小値＋100mmに物体があれば抜け、だめなら再試行
 			uint16_t dist_c = tof_c.readRangeSingleMillimeters();
-			if (dist_c < (dist_min + 50))
+			if (dist_c < (dist_min + 100))
 			{
 				break;
 			}
@@ -543,6 +526,7 @@ void following()
 	}
 	else if (dist_c < 50) //near -> stop
 	{
+		lost_flag = 2 ^ 4;
 		rpm_trg_L = 0;
 		rpm_trg_R = 0;
 		for (int e = 0; e < LEDNUM; e++)
@@ -551,9 +535,9 @@ void following()
 			pixels.show();
 		}
 	}
-	else
-	{ //follow
-
+	else if (dist_c < 2000) //2m まで　follow
+	{ 
+		lost_flag = 2 ^ 4;
 	  //distが最大2000なので目標値が20~60　rpmぐらい。
 		rpm_trg_L = dist_c / 50 + 20;
 		rpm_trg_R = dist_c / 50 + 20;
@@ -564,4 +548,36 @@ void following()
 			pixels.show();
 		}
 	}
+}
+void ble_setup() {
+	// Create the BLE Device
+	BLEDevice::init("UART Service");
+
+	// Create the BLE Server
+	pServer = BLEDevice::createServer();
+	pServer->setCallbacks(new MyServerCallbacks());
+
+	// Create the BLE Service
+	BLEService *pService = pServer->createService(SERVICE_UUID);
+
+	// Create a BLE Characteristic
+	pTxCharacteristic = pService->createCharacteristic(
+		CHARACTERISTIC_UUID_TX,
+		BLECharacteristic::PROPERTY_NOTIFY
+	);
+
+	pTxCharacteristic->addDescriptor(new BLE2902());
+
+	BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
+		CHARACTERISTIC_UUID_RX,
+		BLECharacteristic::PROPERTY_WRITE
+	);
+
+	pRxCharacteristic->setCallbacks(new MyCallbacks());
+
+	// Start the service
+	pService->start();
+	// Start advertising
+	pServer->getAdvertising()->start();
+	Serial.println("Waiting a client connection to notify...");
 }
