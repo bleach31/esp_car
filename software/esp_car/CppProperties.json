@@ -7,7 +7,7 @@
         "${projectRoot}..\\esp_car",
         "${projectRoot}..\\..\\..\\..\\Arduino\\hardware\\espressif\\esp32\\libraries\\Wire\\src",
         "${projectRoot}..\\..\\..\\..\\Arduino\\hardware\\espressif\\esp32\\libraries\\BLE\\src",
-        "D:\\Program Files (x86)\\Arduino\\libraries",
+        "${projectRoot}..\\..\\..\\..\\..\\..\\..\\Program Files (x86)\\Arduino\\libraries",
         "${projectRoot}..\\..\\..\\..\\Arduino\\libraries",
         "${projectRoot}..\\..\\..\\..\\Arduino\\hardware\\espressif\\esp32\\libraries",
         "${projectRoot}..\\..\\..\\..\\Arduino\\hardware\\espressif\\esp32\\cores\\esp32",
@@ -54,10 +54,6 @@
         "${projectRoot}..\\..\\..\\..\\Arduino\\hardware\\espressif\\esp32\\tools\\sdk\\include\\nghttp",
         "${projectRoot}..\\..\\..\\..\\Arduino\\hardware\\espressif\\esp32\\tools\\sdk\\include\\soc",
         "${projectRoot}..\\..\\..\\..\\Arduino\\hardware\\espressif\\esp32\\tools\\sdk\\include\\wpa_supplicant",
-        "${projectRoot}..\\..\\..\\..\\..\\AppData\\Local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\1.20.0-26-gb404fb9-2\\xtensa-lx106-elf\\include\\c++\\4.8.2",
-        "${projectRoot}..\\..\\..\\..\\..\\AppData\\Local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\1.20.0-26-gb404fb9-2\\xtensa-lx106-elf\\include\\c++\\4.8.2\\xtensa-lx106-elf",
-        "${projectRoot}..\\..\\..\\..\\..\\AppData\\Local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\1.20.0-26-gb404fb9-2\\xtensa-lx106-elf\\include",
-        "${projectRoot}..\\..\\..\\..\\..\\AppData\\Local\\arduino15\\packages\\esp8266\\tools\\xtensa-lx106-elf-gcc\\1.20.0-26-gb404fb9-2\\lib\\gcc\\xtensa-lx106-elf\\4.8.2\\include",
         "${projectRoot}..\\..\\..\\..\\Arduino\\hardware\\espressif\\esp32\\tools\\sdk\\include"
       ],
       "defines": [
@@ -66,7 +62,7 @@
         "ESP_PLATFORM",
         "HAVE_CONFIG_H",
         "F_CPU=240000000L",
-        "ARDUINO=10801",
+        "ARDUINO=10805",
         "ARDUINO_ESP32_DEV",
         "ARDUINO_ARCH_ESP32",
         "ESP32",

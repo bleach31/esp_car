@@ -74,19 +74,46 @@ class MyServerCallbacks : public BLEServerCallbacks {
 		deviceConnected = false;
 	}
 };
-#include <string.h>
+#include <string>
 class MyCallbacks : public BLECharacteristicCallbacks {
 	void onWrite(BLECharacteristic *pCharacteristic) {
 		//String rxValue = pCharacteristic->getValue();
 		std::string rxValue = pCharacteristic->getValue();
 
+		int sep = rxValue.find(",");
+		const char* xChar = rxValue.substr(0,sep-1).c_str();
+		const char* yChar = rxValue.substr(sep+1,rxValue.length()).c_str();
+		
+		/*
+		int sep = rxValue.indexOf(",");
+		String xStr = rxValue.substring(0,sep-1);
+		String yStr = rxValue.substring(sep+1,rxValue.length());
+		*/
+
+		//float x = xStr.toFloat();
+		//float y = yStr.toFloat();
+		
+		//int x = std::stoi(xStr);
+		//int y = std::stoi(yStr);
+		float x = strtof(xChar, NULL);
+		float y = strtof(yChar, NULL);
+
+		Serial.print(" x:");
+		Serial.print(x);
+		Serial.print(" y:");
+		Serial.print(y);
+
+		/*
 		if (rxValue.length() > 0) {
 			Serial.print("Received Value: ");
 			for (int i = 0; i < rxValue.length(); i++)
+			{
 				Serial.print(rxValue[i]);
 
+			}
 			Serial.println();
 		}
+		*/
 	}
 };
 
