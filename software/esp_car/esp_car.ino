@@ -95,8 +95,8 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 			if (-1 < y && y < 1)
 				y = 0;
 
-			rpm_trg_L = y * -10 + x * -10;
-			rpm_trg_R = y * -10 + x * 10;
+			rpm_trg_L = (y / abs(y)) * pow(y,2) + (x / abs(x)) * pow(x,2) * -1;
+			rpm_trg_R = (y / abs(y)) * pow(y,2) + (x / abs(x)) * pow(x,2) * 1;
 			/*
 			Serial.print(" x:");
 			Serial.print(x);
