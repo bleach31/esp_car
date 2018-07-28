@@ -61,9 +61,17 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint8_t txValue = 0;
 
+
 #define SERVICE_UUID           "8ff3d648-3ce2-4013-874a-4162cd85300d" // UART service UUID
 #define CHARACTERISTIC_UUID_RX "f35a5414-d140-447b-90e9-3e0263ac7a05"
 #define CHARACTERISTIC_UUID_TX "dd673cd0-24bf-4421-95d5-67bb3ab1f3d6"
+
+// USE Centralモード
+								 
+static BLEUUID ubit_serviceUUID("E95D0753-251D-470A-A062-FA1922DFA9A8");
+static BLEUUID     ubit_accUUID("E95Dca4b-251D-470A-A062-FA1922DFA9A8");
+static BLEAddress *pServerAddress = new BLEAddress("e0:73:d3:8f:72:29");
+static BLERemoteCharacteristic* pRemoteCharacteristic;
 
 class MyServerCallbacks : public BLEServerCallbacks {
 	void onConnect(BLEServer* pServer) {
@@ -109,13 +117,42 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 	}
 };
 
+
+static void notifyCallback(
+	BLERemoteCharacteristic* pBLERemoteCharacteristic,
+	uint8_t* pData,
+	size_t length,
+	bool isNotify) 
+{
+	Serial.print("Notify callback for characteristic: ");
+	//Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
+	//Serial.print(" of data length ");
+	//Serial.print(length);
+
+  int16_t sx,sy,sz;
+  
+  memcpy(&sx,&pData[0],2);
+  memcpy(&sy,&pData[2],2);
+  memcpy(&sz,&pData[4],2);
+  Serial.print("\t");
+  Serial.print(sx);
+  Serial.print("\t");
+  Serial.print(sy);
+  Serial.print("\t");
+  Serial.print(sz);
+}
+
+
+
+
 ///////////////////////Mode///////////////////
 enum Mode
 {
 	DEBUG,
 	FOLLOW,
 	RC,
-	INIT
+	INIT,
+	RC_Central
 };
 enum Mode mode = DEBUG;
 enum Mode pre_mode = INIT;
@@ -126,7 +163,7 @@ void gotTouch0()
 }
 void gotTouch2()
 {
-
+	mode = RC_Central;
 }
 
 void gotTouch3() 
@@ -139,143 +176,8 @@ void gotTouch5()
 	mode = FOLLOW;
 }
 
-//////////////////////////setup/////////////////////
 
-void setup()
-{
-	Serial.begin(115200);
-
-	//RPM用
-	qei_setup_x4(PCNT_UNIT_0, GPIO_NUM_35, GPIO_NUM_34); //LEFT
-	qei_setup_x4(PCNT_UNIT_1, GPIO_NUM_39, GPIO_NUM_36); //RIGHT
-
-	//制御用
-	qei_setup_x1(PCNT_UNIT_2, GPIO_NUM_35, GPIO_NUM_34);
-	qei_setup_x1(PCNT_UNIT_3, GPIO_NUM_39, GPIO_NUM_36);
-
-	//タイマー
-	timer = timerBegin(0, 80, true); //80分周で1usec
-
-	//タスク設定 taskNO_AFFINITYでコア選択はスケジューラに委託
-	xTaskCreatePinnedToCore(loop_fast, "loop_fast", 4096, NULL, 2, &th[0], tskNO_AFFINITY);
-	xTaskCreatePinnedToCore(loop_slow, "loop_slow", 4096, NULL, 3, &th[0], tskNO_AFFINITY);
-
-	//LED
-	pixels.begin(); // This initializes the NeoPixel library.
-	pixels.setBrightness(32); //0-255
-	pixels.clear();
-	pixels.setPixelColor(0, red);
-
-	//IMU
-	I2C.begin(GPIO_NUM_21, GPIO_NUM_22, 400000); // SDA, SCL
-
-	mpu.setWire(&I2C);
-	mpu.beginAccel();
-	mpu.beginGyro();
-	mpu.beginMag();
-
-	//ToF
-	tof_c.setWire(&I2C);
-	tof_c.init();
-	tof_c.setTimeout(500);
-	// LONG RANGE MODE
-	// lower the return signal rate limit (default is 0.25 MCPS)
-	tof_c.setSignalRateLimit(0.1);
-	// increase laser pulse periods (defaults are 14 and 10 PCLKs)
-	tof_c.setVcselPulsePeriod(VL53L0X::VcselPeriodPreRange, 18);
-	tof_c.setVcselPulsePeriod(VL53L0X::VcselPeriodFinalRange, 14);
-
-	//Touch
-	touchAttachInterrupt(T0, gotTouch0, touchThr);
-	touchAttachInterrupt(T2, gotTouch2, touchThr);
-	touchAttachInterrupt(T3, gotTouch3, touchThr);
-	touchAttachInterrupt(T5, gotTouch5, touchThr);
-
-}
-
-void loop()
-{
-
-	//モードごとの定期処理
-	switch (mode)
-	{
-	case DEBUG:
-		debug();
-		break;
-	case FOLLOW:
-		//呼び出し関数内部でループする場合,while(mode == {xxx})とし、モード変更時に抜けられるようにする
-		following();
-		break;
-	case RC:
-		{
-			// disconnecting
-			if (!deviceConnected && oldDeviceConnected) {
-				rpm_trg_L = 0;
-				rpm_trg_R = 0;
-				pixels.clear();
-				pixels.setPixelColor(0, blue);
-				pixels.show();
-				delay(500); // give the bluetooth stack the chance to get things ready
-				pServer->startAdvertising(); // restart advertising
-				Serial.println("restart advertising");
-				oldDeviceConnected = deviceConnected;
-			}
-			// connecting
-			if (deviceConnected && !oldDeviceConnected) {
-				for (int e = 0; e < LEDNUM; e++)
-				{
-					pixels.setPixelColor(e, blue);
-					pixels.show();
-				}
-				// do stuff here on connecting
-				oldDeviceConnected = deviceConnected;
-			}
-			break;
-		}
-
-	default:
-		break;
-	}
-
-	//モードごとの初期化処理
-	if (pre_mode != mode)
-	{
-		// BLEラジコンから抜けるときは強制リセット。　↓がCLOSEされるまで。
-		//		Dynamically Start Restart Bluetooth(BLE) · Issue #351 · nkolban / esp32 - snippets https ://github.com/nkolban/esp32-snippets/issues/351
-		if (pre_mode == RC)
-		{
-			ESP.restart();
-		}
-
-		rpm_trg_L = 0;
-		rpm_trg_R = 0;
-		pixels.clear();
-		switch (mode)
-		{
-		case DEBUG:
-			pixels.setPixelColor(0, orange);
-			pixels.show();
-			break;
-		case FOLLOW:
-			break;
-		case RC:
-			{
-				pixels.setPixelColor(0, blue);
-				pixels.show();
-				ble_setup();
-				break;
-			}
-
-		default:
-			break;
-		}
-	}
-
-	pre_mode = mode;
-	delay(20);
-}
-
-//遅い周期タスク
+//遅い周期タスク,RPM測定、バッテリー測定
 void loop_slow(void *pvParameters)
 {
 	TickType_t xLastWakeTime;
@@ -332,7 +234,8 @@ void loop_slow(void *pvParameters)
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
-//速い周期タスク
+
+//速い周期タスク（速度制御）
 void loop_fast(void *pvParameters)
 {
 	TickType_t xLastWakeTime;
@@ -350,7 +253,7 @@ void loop_fast(void *pvParameters)
 		}
 		else
 		{
-			//90rpmで8vぐらい。＋FB誤差補正
+			//FF　90rpmで8vぐらい。FB誤差補正
 			double trg_v = rpm_trg_L * 0.09 + (rpm_trg_L - rpm_L)*0.01;
 			MotorL.drive(((int)((trg_v * 1000) /vbat)));
 			/*
@@ -549,9 +452,12 @@ void following()
 		}
 	}
 }
-void ble_setup() {
+
+
+void ble_peripheral_setup() 
+{
 	// Create the BLE Device
-	BLEDevice::init("UART Service");
+	BLEDevice::init("UART Service(Peripheral Mode)");
 
 	// Create the BLE Server
 	pServer = BLEDevice::createServer();
@@ -580,4 +486,207 @@ void ble_setup() {
 	// Start advertising
 	pServer->getAdvertising()->start();
 	Serial.println("Waiting a client connection to notify...");
+}
+
+void ble_peripheral_loop()
+{			// disconnecting
+	if (!deviceConnected && oldDeviceConnected) {
+		rpm_trg_L = 0;
+		rpm_trg_R = 0;
+		pixels.clear();
+		pixels.setPixelColor(0, blue);
+		pixels.show();
+		delay(500); // give the bluetooth stack the chance to get things ready
+		pServer->startAdvertising(); // restart advertising
+		Serial.println("restart advertising");
+		oldDeviceConnected = deviceConnected;
+	}
+	// connecting
+	if (deviceConnected && !oldDeviceConnected) {
+		for (int e = 0; e < LEDNUM; e++)
+		{
+			pixels.setPixelColor(e, blue);
+			pixels.show();
+		}
+		// do stuff here on connecting
+		oldDeviceConnected = deviceConnected;
+	}
+}
+
+void ble_central_setup() {
+	BLEDevice::init("UART Service(Central Mode)");
+	
+	Serial.print("Forming a connection to ");
+	Serial.println((*pServerAddress).toString().c_str());
+
+	BLEClient*  pClient = BLEDevice::createClient();
+	Serial.println(" - Created client");
+
+	// Connect to the  BLE Server.
+	pClient->connect(*pServerAddress);
+	Serial.println(" - Connected to server");
+
+	// Obtain a reference to the service we are after in the remote BLE server.
+	BLERemoteService* pRemoteService = pClient->getService(ubit_serviceUUID);
+	if (pRemoteService == nullptr) {
+		Serial.print("Failed to find our service UUID: ");
+		Serial.println(ubit_serviceUUID.toString().c_str());
+	}
+	Serial.println(" - Found our service");
+
+	
+
+	// Obtain a reference to the characteristic in the service of the remote BLE server.
+	pRemoteCharacteristic = pRemoteService->getCharacteristic(ubit_accUUID);
+	if (pRemoteCharacteristic == nullptr) {
+		Serial.print("Failed to find our characteristic UUID: ");
+		Serial.println(ubit_accUUID.toString().c_str());
+	}
+	Serial.println(" - Found our characteristic");
+
+	//enable notify
+    BLERemoteDescriptor *pRD = pRemoteCharacteristic->getDescriptor(BLEUUID((uint16_t) 0x2902));
+    if (pRD == nullptr) {
+      Serial.print("Failed to find our descriptor UUID: ");
+      Serial.println(BLEUUID((uint16_t) 0x2902).toString().c_str());
+      for(;;);
+    }
+    else Serial.println("Got 2902");
+    uint8_t data[2] = {0x01,0x00};
+    pRD->writeValue(data, 2, false);
+
+	deviceConnected = true;
+  for (int e = 0; e < LEDNUM; e++)
+  {
+    pixels.setPixelColor(e, blue);
+    pixels.show();
+  }
+	// Read the value of the characteristic.
+	//std::string value = pRemoteCharacteristic->readValue();
+	//Serial.print("The characteristic value was: ");
+	//Serial.println(value.c_str());
+
+	pRemoteCharacteristic->registerForNotify(notifyCallback);
+}
+
+//////////////////////////setup/////////////////////
+
+void setup()
+{
+	Serial.begin(115200);
+
+	//RPM用
+	qei_setup_x4(PCNT_UNIT_0, GPIO_NUM_35, GPIO_NUM_34); //LEFT
+	qei_setup_x4(PCNT_UNIT_1, GPIO_NUM_39, GPIO_NUM_36); //RIGHT
+
+	//制御用
+	qei_setup_x1(PCNT_UNIT_2, GPIO_NUM_35, GPIO_NUM_34);
+	qei_setup_x1(PCNT_UNIT_3, GPIO_NUM_39, GPIO_NUM_36);
+
+	//タイマー
+	timer = timerBegin(0, 80, true); //80分周で1usec
+
+	//タスク設定 taskNO_AFFINITYでコア選択はスケジューラに委託
+	xTaskCreatePinnedToCore(loop_fast, "loop_fast", 4096, NULL, 2, &th[0], tskNO_AFFINITY);
+	xTaskCreatePinnedToCore(loop_slow, "loop_slow", 4096, NULL, 3, &th[0], tskNO_AFFINITY);
+
+	//LED
+	pixels.begin(); // This initializes the NeoPixel library.
+	pixels.setBrightness(32); //0-255
+	pixels.clear();
+	pixels.setPixelColor(0, red);
+
+	//IMU
+	I2C.begin(GPIO_NUM_21, GPIO_NUM_22, 400000); // SDA, SCL
+
+	mpu.setWire(&I2C);
+	mpu.beginAccel();
+	mpu.beginGyro();
+	mpu.beginMag();
+
+	//ToF
+	tof_c.setWire(&I2C);
+	tof_c.init();
+	tof_c.setTimeout(500);
+	// LONG RANGE MODE
+	// lower the return signal rate limit (default is 0.25 MCPS)
+	tof_c.setSignalRateLimit(0.1);
+	// increase laser pulse periods (defaults are 14 and 10 PCLKs)
+	tof_c.setVcselPulsePeriod(VL53L0X::VcselPeriodPreRange, 18);
+	tof_c.setVcselPulsePeriod(VL53L0X::VcselPeriodFinalRange, 14);
+
+	//Touch
+	touchAttachInterrupt(T0, gotTouch0, touchThr);
+	touchAttachInterrupt(T2, gotTouch2, touchThr);
+	touchAttachInterrupt(T3, gotTouch3, touchThr);
+	touchAttachInterrupt(T5, gotTouch5, touchThr);
+
+}
+
+void loop()
+{
+
+	//モードごとの定期処理
+	switch (mode)
+	{
+	case DEBUG:
+		debug();
+		break;
+	case FOLLOW:
+		//呼び出し関数内部でループする場合,while(mode == {xxx})とし、モード変更時に抜けられるようにする
+		following();
+		break;
+	case RC:
+		ble_peripheral_loop();		
+		break;
+	case RC_Central:
+		break;
+
+	default:
+		break;
+	}
+
+	//モードごとの初期化処理
+	if (pre_mode != mode)
+	{
+		// BLEラジコンから抜けるときは強制リセット。　↓がCLOSEされるまで。
+		//		Dynamically Start Restart Bluetooth(BLE) · Issue #351 · nkolban / esp32 - snippets https ://github.com/nkolban/esp32-snippets/issues/351
+		if (pre_mode == RC || pre_mode == RC_Central)
+		{
+			ESP.restart();
+		}
+
+		rpm_trg_L = 0;
+		rpm_trg_R = 0;
+		pixels.clear();
+		switch (mode)
+		{
+		case DEBUG:
+			pixels.setPixelColor(0, orange);
+			pixels.show();
+			break;
+		case FOLLOW:
+			break;
+		case RC:
+			{
+				pixels.setPixelColor(0, blue);
+				pixels.show();
+				ble_peripheral_setup();
+				break;
+			}
+		case RC_Central:
+			{
+				pixels.setPixelColor(3, blue);
+				pixels.show();
+				ble_central_setup();
+				break;
+			}
+
+		default:
+			break;
+		}
+	}
+
+	pre_mode = mode;
+	delay(20);
 }
