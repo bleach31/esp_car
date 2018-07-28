@@ -68,8 +68,10 @@ uint8_t txValue = 0;
 
 // USE Centralモード
 
-static BLEUUID ubit_serviceUUID("E95D0753-251D-470A-A062-FA1922DFA9A8");
-static BLEUUID     ubit_accUUID("E95Dca4b-251D-470A-A062-FA1922DFA9A8");
+//static BLEUUID ubit_serviceUUID("E95D0753-251D-470A-A062-FA1922DFA9A8");
+//static BLEUUID     ubit_accUUID("E95Dca4b-251D-470A-A062-FA1922DFA9A8");
+static BLEUUID ubit_serviceUUID("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+static BLEUUID     ubit_uartUUID("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
 static BLEAddress *pServerAddress = new BLEAddress("e0:73:d3:8f:72:29");
 static BLERemoteCharacteristic* pRemoteCharacteristic;
 
@@ -127,9 +129,9 @@ static void notifyCallback(
 {
 	Serial.print("Notify callback for characteristic: ");
 	//Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
-	//Serial.print(" of data length ");
-	//Serial.print(length);
-
+	Serial.print(" of data length ");
+	Serial.print(length);
+	/*
 	int16_t sx, sy, sz;//-1000 ~ 1000
 
 	memcpy(&sx, &pData[0], 2);
@@ -162,7 +164,7 @@ static void notifyCallback(
 	Serial.print("\t");
 	Serial.print(rpm_trg_R);
 	Serial.println("");
-
+	*/
 }
 
 
@@ -562,14 +564,14 @@ void ble_central_setup() {
 
 
 	// Obtain a reference to the characteristic in the service of the remote BLE server.
-	pRemoteCharacteristic = pRemoteService->getCharacteristic(ubit_accUUID);
+	pRemoteCharacteristic = pRemoteService->getCharacteristic(ubit_uartUUID);
 	if (pRemoteCharacteristic == nullptr) {
 		Serial.print("Failed to find our characteristic UUID: ");
-		Serial.println(ubit_accUUID.toString().c_str());
+		Serial.println(ubit_uartUUID.toString().c_str());
 	}
 	Serial.println(" - Found our characteristic");
 
-	//enable notify
+	//enable indicate/notify
 	BLERemoteDescriptor *pRD = pRemoteCharacteristic->getDescriptor(BLEUUID((uint16_t)0x2902));
 	if (pRD == nullptr) {
 		Serial.print("Failed to find our descriptor UUID: ");
@@ -577,9 +579,8 @@ void ble_central_setup() {
 		for (;;);
 	}
 	else Serial.println("Got 2902");
-	uint8_t data[2] = { 0x01,0x00 };
+	uint8_t data[2] = { 0x02,0x00 }; //0x01 0x00 -> notify
 	pRD->writeValue(data, 2, false);
-
 	deviceConnected = true;
 	for (int e = 0; e < LEDNUM; e++)
 	{
@@ -587,9 +588,9 @@ void ble_central_setup() {
 		pixels.show();
 	}
 	// Read the value of the characteristic.
-	//std::string value = pRemoteCharacteristic->readValue();
-	//Serial.print("The characteristic value was: ");
-	//Serial.println(value.c_str());
+	std::string value = pRemoteCharacteristic->readValue();
+	Serial.print("The characteristic value was: ");
+	Serial.println(value.c_str());
 
 	pRemoteCharacteristic->registerForNotify(notifyCallback);
 }
@@ -656,17 +657,20 @@ void loop()
 	switch (mode)
 	{
 	case DEBUG:
+	{
 		debug();
 		break;
+	}
 	case FOLLOW:
-		//呼び出し関数内部でループする場合,while(mode == {xxx})とし、モード変更時に抜けられるようにする
+	{	//呼び出し関数内部でループする場合,while(mode == {xxx})とし、モード変更時に抜けられるようにする
 		following();
 		break;
+	}
 	case RC:
-		{
-			ble_peripheral_loop();
-			break;
-		}
+	{
+		ble_peripheral_loop();
+		break;
+	}
 	case RC_Central:
 		break;
 
@@ -690,10 +694,11 @@ void loop()
 		switch (mode)
 		{
 		case DEBUG:
+		{
 			pixels.setPixelColor(0, orange);
 			pixels.show();
 			break;
-
+		}
 		case FOLLOW:
 			break;
 
