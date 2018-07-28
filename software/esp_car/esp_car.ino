@@ -67,7 +67,7 @@ uint8_t txValue = 0;
 #define CHARACTERISTIC_UUID_TX "dd673cd0-24bf-4421-95d5-67bb3ab1f3d6"
 
 // USE Centralモード
-								 
+
 static BLEUUID ubit_serviceUUID("E95D0753-251D-470A-A062-FA1922DFA9A8");
 static BLEUUID     ubit_accUUID("E95Dca4b-251D-470A-A062-FA1922DFA9A8");
 static BLEAddress *pServerAddress = new BLEAddress("e0:73:d3:8f:72:29");
@@ -89,22 +89,22 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 
 		if (rxValue.length() > 0) {
 
-			
+
 			int sep = rxValue.find(",");
 			const char* xChar = rxValue.substr(0, sep - 1).c_str();
 			const char* yChar = rxValue.substr(sep + 1, rxValue.length()).c_str();
 
 			float x = strtof(xChar, NULL);
 			float y = strtof(yChar, NULL);
-			
+
 			//不感帯
 			if (-1 < x && x < 1)
 				x = 0;
 			if (-1 < y && y < 1)
 				y = 0;
 
-			rpm_trg_L = y * -10 + x * -10;
-			rpm_trg_R = y * -10 + x * 10;
+			rpm_trg_L = (y / abs(y)) * pow(y, 2) + (x / abs(x)) * pow(x, 2) * -1;
+			rpm_trg_R = (y / abs(y)) * pow(y, 2) + (x / abs(x)) * pow(x, 2) * 1;
 			/*
 			Serial.print(" x:");
 			Serial.print(x);
@@ -122,27 +122,47 @@ static void notifyCallback(
 	BLERemoteCharacteristic* pBLERemoteCharacteristic,
 	uint8_t* pData,
 	size_t length,
-	bool isNotify) 
+	bool isNotify)
 {
 	Serial.print("Notify callback for characteristic: ");
 	//Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
 	//Serial.print(" of data length ");
 	//Serial.print(length);
 
-  int16_t sx,sy,sz;
-  
-  memcpy(&sx,&pData[0],2);
-  memcpy(&sy,&pData[2],2);
-  memcpy(&sz,&pData[4],2);
-  Serial.print("\t");
-  Serial.print(sx);
-  Serial.print("\t");
-  Serial.print(sy);
-  Serial.print("\t");
-  Serial.print(sz);
+	int16_t sx, sy, sz;//-1000 ~ 1000
+
+	memcpy(&sx, &pData[0], 2);
+	memcpy(&sy, &pData[2], 2);
+	memcpy(&sz, &pData[4], 2);
+	Serial.print("\t");
+	Serial.print(sx);
+	Serial.print("\t");
+	Serial.print(sy);
+	Serial.print("\t");
+	Serial.print(sz);
+
+
+	float x = (float)sx / 100.0; //-10 ~ 10
+	float y = (float)sy / 100.0; //-10 ~ 10
+
+
+	//不感帯
+	if (-1 < x && x < 1)
+		x = 0;
+	if (-1 < y && y < 1)
+		y = 0;
+
+	rpm_trg_L = pow(y, 3) + pow(x, 3) * -1;
+	rpm_trg_R = pow(y, 3) + pow(x, 3) * 1;
+
+
+	Serial.print("\t");
+	Serial.print(rpm_trg_L);
+	Serial.print("\t");
+	Serial.print(rpm_trg_R);
+	Serial.println("");
+
 }
-
-
 
 
 ///////////////////////Mode///////////////////
@@ -166,7 +186,7 @@ void gotTouch2()
 	mode = RC_Central;
 }
 
-void gotTouch3() 
+void gotTouch3()
 {
 	mode = RC;
 }
@@ -255,7 +275,7 @@ void loop_fast(void *pvParameters)
 		{
 			//FF　90rpmで8vぐらい。FB誤差補正
 			double trg_v = rpm_trg_L * 0.09 + (rpm_trg_L - rpm_L)*0.01;
-			MotorL.drive(((int)((trg_v * 1000) /vbat)));
+			MotorL.drive(((int)((trg_v * 1000) / vbat)));
 			/*
 			Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t");
 			Serial.print(trg_v);
@@ -345,7 +365,7 @@ void debug()
 	Serial.println("");
 }
 
-uint8_t lost_flag=2^4;
+uint8_t lost_flag = 2 ^ 4;
 void following()
 {
 	//////////////////////距離取得
@@ -357,7 +377,7 @@ void following()
 	Serial.println(dist_c);
 	if (dist_c > 8000) // lost -> search object
 	{
-		lost_flag /=2;//5以上割ったら0
+		lost_flag /= 2;//5以上割ったら0
 
 		while (mode == FOLLOW && lost_flag <= 0)//5連続でロスト判定
 		{
@@ -439,9 +459,9 @@ void following()
 		}
 	}
 	else if (dist_c < 2000) //2m まで　follow
-	{ 
+	{
 		lost_flag = 2 ^ 4;
-	  //distが最大2000なので目標値が20~60　rpmぐらい。
+		//distが最大2000なので目標値が20~60　rpmぐらい。
 		rpm_trg_L = dist_c / 50 + 20;
 		rpm_trg_R = dist_c / 50 + 20;
 
@@ -454,7 +474,7 @@ void following()
 }
 
 
-void ble_peripheral_setup() 
+void ble_peripheral_setup()
 {
 	// Create the BLE Device
 	BLEDevice::init("UART Service(Peripheral Mode)");
@@ -489,7 +509,8 @@ void ble_peripheral_setup()
 }
 
 void ble_peripheral_loop()
-{			// disconnecting
+{	
+	// disconnecting
 	if (!deviceConnected && oldDeviceConnected) {
 		rpm_trg_L = 0;
 		rpm_trg_R = 0;
@@ -513,9 +534,10 @@ void ble_peripheral_loop()
 	}
 }
 
+
 void ble_central_setup() {
-	BLEDevice::init("UART Service(Central Mode)");
-	
+	BLEDevice::init("");
+
 	Serial.print("Forming a connection to ");
 	Serial.println((*pServerAddress).toString().c_str());
 
@@ -534,7 +556,7 @@ void ble_central_setup() {
 	}
 	Serial.println(" - Found our service");
 
-	
+
 
 	// Obtain a reference to the characteristic in the service of the remote BLE server.
 	pRemoteCharacteristic = pRemoteService->getCharacteristic(ubit_accUUID);
@@ -545,22 +567,22 @@ void ble_central_setup() {
 	Serial.println(" - Found our characteristic");
 
 	//enable notify
-    BLERemoteDescriptor *pRD = pRemoteCharacteristic->getDescriptor(BLEUUID((uint16_t) 0x2902));
-    if (pRD == nullptr) {
-      Serial.print("Failed to find our descriptor UUID: ");
-      Serial.println(BLEUUID((uint16_t) 0x2902).toString().c_str());
-      for(;;);
-    }
-    else Serial.println("Got 2902");
-    uint8_t data[2] = {0x01,0x00};
-    pRD->writeValue(data, 2, false);
+	BLERemoteDescriptor *pRD = pRemoteCharacteristic->getDescriptor(BLEUUID((uint16_t)0x2902));
+	if (pRD == nullptr) {
+		Serial.print("Failed to find our descriptor UUID: ");
+		Serial.println(BLEUUID((uint16_t)0x2902).toString().c_str());
+		for (;;);
+	}
+	else Serial.println("Got 2902");
+	uint8_t data[2] = { 0x01,0x00 };
+	pRD->writeValue(data, 2, false);
 
 	deviceConnected = true;
-  for (int e = 0; e < LEDNUM; e++)
-  {
-    pixels.setPixelColor(e, blue);
-    pixels.show();
-  }
+	for (int e = 0; e < LEDNUM; e++)
+	{
+		pixels.setPixelColor(e, blue);
+		pixels.show();
+	}
 	// Read the value of the characteristic.
 	//std::string value = pRemoteCharacteristic->readValue();
 	//Serial.print("The characteristic value was: ");
@@ -587,8 +609,8 @@ void setup()
 	timer = timerBegin(0, 80, true); //80分周で1usec
 
 	//タスク設定 taskNO_AFFINITYでコア選択はスケジューラに委託
-	xTaskCreatePinnedToCore(loop_fast, "loop_fast", 4096, NULL, 2, &th[0], tskNO_AFFINITY);
-	xTaskCreatePinnedToCore(loop_slow, "loop_slow", 4096, NULL, 3, &th[0], tskNO_AFFINITY);
+	xTaskCreatePinnedToCore(loop_fast, "loop_fast", 2048, NULL, 2, &th[0], tskNO_AFFINITY);
+	xTaskCreatePinnedToCore(loop_slow, "loop_slow", 2048, NULL, 3, &th[0], tskNO_AFFINITY);
 
 	//LED
 	pixels.begin(); // This initializes the NeoPixel library.
@@ -626,6 +648,7 @@ void setup()
 void loop()
 {
 
+
 	//モードごとの定期処理
 	switch (mode)
 	{
@@ -637,7 +660,7 @@ void loop()
 		following();
 		break;
 	case RC:
-		ble_peripheral_loop();		
+		ble_peripheral_loop();
 		break;
 	case RC_Central:
 		break;
@@ -665,22 +688,21 @@ void loop()
 			pixels.setPixelColor(0, orange);
 			pixels.show();
 			break;
+
 		case FOLLOW:
 			break;
+
 		case RC:
-			{
-				pixels.setPixelColor(0, blue);
-				pixels.show();
-				ble_peripheral_setup();
-				break;
-			}
+			pixels.setPixelColor(0, blue);
+			pixels.show();
+			ble_peripheral_setup();
+			break;
+
 		case RC_Central:
-			{
-				pixels.setPixelColor(3, blue);
-				pixels.show();
-				ble_central_setup();
-				break;
-			}
+			pixels.setPixelColor(3, blue);
+			pixels.show();
+			ble_central_setup();
+			break;
 
 		default:
 			break;
