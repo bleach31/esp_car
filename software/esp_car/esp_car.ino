@@ -103,8 +103,9 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 			if (-1 < y && y < 1)
 				y = 0;
 
-			rpm_trg_L = (y / abs(y)) * pow(y, 2) + (x / abs(x)) * pow(x, 2) * -1;
-			rpm_trg_R = (y / abs(y)) * pow(y, 2) + (x / abs(x)) * pow(x, 2) * 1;
+			rpm_trg_L = y * -10 + x * -10;
+			rpm_trg_R = y * -10 + x * 10;
+
 			/*
 			Serial.print(" x:");
 			Serial.print(x);
@@ -152,8 +153,8 @@ static void notifyCallback(
 	if (-1 < y && y < 1)
 		y = 0;
 
-	rpm_trg_L = pow(y, 3) + pow(x, 3) * -1;
-	rpm_trg_R = pow(y, 3) + pow(x, 3) * 1;
+	rpm_trg_L = y * -5 + x * -5;
+	rpm_trg_R = y * -5 + x * 5;
 
 
 	Serial.print("\t");
@@ -477,7 +478,7 @@ void following()
 void ble_peripheral_setup()
 {
 	// Create the BLE Device
-	BLEDevice::init("UART Service(Peripheral Mode)");
+	BLEDevice::init("UART Service");
 
 	// Create the BLE Server
 	pServer = BLEDevice::createServer();
@@ -508,6 +509,7 @@ void ble_peripheral_setup()
 	Serial.println("Waiting a client connection to notify...");
 }
 
+
 void ble_peripheral_loop()
 {	
 	// disconnecting
@@ -536,6 +538,7 @@ void ble_peripheral_loop()
 
 
 void ble_central_setup() {
+	
 	BLEDevice::init("");
 
 	Serial.print("Forming a connection to ");
@@ -660,8 +663,10 @@ void loop()
 		following();
 		break;
 	case RC:
-		ble_peripheral_loop();
-		break;
+		{
+			ble_peripheral_loop();
+			break;
+		}
 	case RC_Central:
 		break;
 
@@ -693,17 +698,19 @@ void loop()
 			break;
 
 		case RC:
+		{
 			pixels.setPixelColor(0, blue);
 			pixels.show();
 			ble_peripheral_setup();
 			break;
-
+		}	
 		case RC_Central:
+		{
 			pixels.setPixelColor(3, blue);
 			pixels.show();
 			ble_central_setup();
 			break;
-
+		}
 		default:
 			break;
 		}
