@@ -105,8 +105,8 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 			if (-1 < y && y < 1)
 				y = 0;
 
-			rpm_trg_L = y * -10 + x * -10;
-			rpm_trg_R = y * -10 + x * 10;
+			rpm_trg_L = y * -5 + x * -5;
+			rpm_trg_R = y * -5 + x * 5;
 
 			/*
 			Serial.print(" x:");
@@ -131,6 +131,33 @@ static void notifyCallback(
 	//Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
 	Serial.print(" of data length ");
 	Serial.print(length);
+	Serial.print(" data: ");
+
+	
+	for(int i = 0;i < sizeof(pData)/sizeof(*pData);i++)
+	{
+		Serial.print((char)pData[i]);
+	}
+
+	std::string str = (char *)pData;
+
+	int sep = str.find(",");
+
+	const char* xChar = str.substr(0, sep - 1).c_str();
+	const char* yChar = str.substr(sep + 1, str.length()).c_str();
+
+	float x = strtof(xChar, NULL);
+	float y = strtof(yChar, NULL);
+
+	//不感帯
+	if (-1 < x && x < 1)
+		x = 0;
+	if (-1 < y && y < 1)
+		y = 0;
+
+	rpm_trg_L = y * -5 + x * -5;
+	rpm_trg_R = y * -5 + x * 5;
+
 	/*
 	int16_t sx, sy, sz;//-1000 ~ 1000
 
