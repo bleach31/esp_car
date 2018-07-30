@@ -93,26 +93,26 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 
 
 			int sep = rxValue.find(",");
-			const char* xChar = rxValue.substr(0, sep - 1).c_str();
-			const char* yChar = rxValue.substr(sep + 1, rxValue.length()).c_str();
+			const char* xChar = rxValue.substr(0, sep).c_str();
+			const char* yChar = rxValue.substr(sep + 1).c_str();
 
-			float x = strtof(xChar, NULL);
-			float y = strtof(yChar, NULL);
+			float x = strtof(xChar, NULL) / 9.8; //ms^2 to G
+			float y = strtof(yChar, NULL) / 9.8; //ms^2 to G
 
 			//不感帯
-			if (-1 < x && x < 1)
+			if (-0.1 < x && x < 0.1)
 				x = 0;
-			if (-1 < y && y < 1)
+			if (-0.1 < y && y < 0.1)
 				y = 0;
 
-			rpm_trg_L = y * -5 + x * -5;
-			rpm_trg_R = y * -5 + x * 5;
+			rpm_trg_L = y * -50 + x * -50;
+			rpm_trg_R = y * -50 + x * 50;
 
 			/*
 			Serial.print(" x:");
 			Serial.print(x);
 			Serial.print(" y:");
-			Serial.print(y)
+			Serial.print(y);
 			Serial.println("");
 			*/
 
@@ -127,37 +127,53 @@ static void notifyCallback(
 	size_t length,
 	bool isNotify)
 {
+	/*
 	Serial.print("Notify callback for characteristic: ");
 	//Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
 	Serial.print(" of data length ");
 	Serial.print(length);
 	Serial.print(" data: ");
 
-	
-	for(int i = 0;i < sizeof(pData)/sizeof(*pData);i++)
+	for(int i = 0;i < length ;i++)
 	{
 		Serial.print((char)pData[i]);
 	}
+	*/
+	//pdataに前回の値が残ってる事があるのでいったん配列にコピー
+	char pChar[length+1];
+	memcpy(pChar,pData,length);
+	pChar[length] = '\0';
+	
+	std::string str = pChar;
+	
 
-	std::string str = (char *)pData;
+	Serial.print(" String Value: ");
+	for (int i = 0; i < str.length(); i++)
+		Serial.print(str[i]);
 
 	int sep = str.find(",");
 
-	const char* xChar = str.substr(0, sep - 1).c_str();
-	const char* yChar = str.substr(sep + 1, str.length()).c_str();
+	const char* xChar = str.substr(0, sep).c_str();
+	const char* yChar = str.substr(sep + 1).c_str();
 
-	float x = strtof(xChar, NULL);
-	float y = strtof(yChar, NULL);
-
+	float x = strtof(xChar, NULL) / 1000; //mG to G
+	float y = strtof(yChar, NULL) / 1000; //mG to G
+	
+	Serial.print(" x:");
+	Serial.print(x);
+	Serial.print(" y:");
+	Serial.print(y);
+	Serial.print("");
 	//不感帯
-	if (-1 < x && x < 1)
+	if (-0.1 < x && x < 0.1)
 		x = 0;
-	if (-1 < y && y < 1)
+	if (-0.1 < y && y < 0.1)
 		y = 0;
 
-	rpm_trg_L = y * -5 + x * -5;
-	rpm_trg_R = y * -5 + x * 5;
+	rpm_trg_L = y * -50 + x * 50;
+	rpm_trg_R = y * -50 + x * -50;
 
+	Serial.println("");
 	/*
 	int16_t sx, sy, sz;//-1000 ~ 1000
 
@@ -190,7 +206,6 @@ static void notifyCallback(
 	Serial.print(rpm_trg_L);
 	Serial.print("\t");
 	Serial.print(rpm_trg_R);
-	Serial.println("");
 	*/
 }
 
