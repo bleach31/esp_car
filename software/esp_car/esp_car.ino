@@ -1,5 +1,6 @@
 #define ESP32
 #include "esp_deep_sleep.h"
+#define DEBUG
 //////////////////////////Motor//////////////////////
 #include "SparkFun_TB6612.h"
 Motor MotorR = Motor(GPIO_NUM_18, GPIO_NUM_19, GPIO_NUM_25, 0, 1); //制御ピン18，19, PWMピン25
@@ -146,10 +147,11 @@ static void notifyCallback(
 	
 	std::string str = pChar;
 	
-
+	/*
 	Serial.print(" String Value: ");
 	for (int i = 0; i < str.length(); i++)
 		Serial.print(str[i]);
+	*/
 
 	int sep = str.find(",");
 
@@ -159,11 +161,13 @@ static void notifyCallback(
 	float x = strtof(xChar, NULL) / 1000; //mG to G
 	float y = strtof(yChar, NULL) / 1000; //mG to G
 	
+	/*
 	Serial.print(" x:");
 	Serial.print(x);
 	Serial.print(" y:");
 	Serial.print(y);
 	Serial.print("");
+	*/
 	//不感帯
 	if (-0.1 < x && x < 0.1)
 		x = 0;
@@ -173,8 +177,8 @@ static void notifyCallback(
 	rpm_trg_L = y * -50 + x * 50;
 	rpm_trg_R = y * -50 + x * -50;
 
-	Serial.println("");
 	/*
+	Serial.println("");
 	int16_t sx, sy, sz;//-1000 ~ 1000
 
 	memcpy(&sx, &pData[0], 2);
@@ -213,18 +217,18 @@ static void notifyCallback(
 ///////////////////////Mode///////////////////
 enum Mode
 {
-	DEBUG,
+	DEFAULT,
 	FOLLOW,
 	RC,
 	INIT,
 	RC_Central
 };
-enum Mode mode = DEBUG;
+enum Mode mode = DEFAULT;
 enum Mode pre_mode = INIT;
-bool touch2detected = false;
+
 void gotTouch0()
 {
-	mode = DEBUG;
+	mode = DEFAULT;
 }
 void gotTouch2()
 {
@@ -279,12 +283,13 @@ void loop_slow(void *pvParameters)
 
 		//バッテリー値
 		vbat = ((double)analogRead(BAT_PIN) / 4095) * ((35.0) / 10.0) * 3.3;//35/10はは抵抗値の適合後の値
-		if (vbat < 6.0) {
+		if (vbat < 6.4) {
 			rpm_trg_L = 0;
 			rpm_trg_R = 0;
 			pixels.clear();
+			delay(100);
 
-			Serial.print(" low battery\n");
+			//Serial.print(" low battery\n");
 
 			// スリープのための諸々の設定(今回はGPIO0ピンを使う)
 			esp_deep_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
@@ -348,6 +353,7 @@ void loop_fast(void *pvParameters)
 
 void debug()
 {
+
 	Serial.print("TrgRPM L:");
 	Serial.print(rpm_trg_L);
 	Serial.print(" R:");
@@ -417,9 +423,11 @@ void following()
 	uint16_t dist_c = tof_c.readRangeSingleMillimeters();
 	//if (tof_c.timeoutOccurred()) { Serial.print(" TIMEOUT"); }
 
-
+#ifdef DEBUG
 	Serial.print(" dist:");
 	Serial.println(dist_c);
+#endif
+
 	if (dist_c > 8000) // lost -> search object
 	{
 		lost_flag /= 2;//5以上割ったら0
@@ -445,10 +453,12 @@ void following()
 
 			while (mode == FOLLOW)
 			{
+#ifdef DEBUG
 				Serial.print("L:");
 				Serial.print(count_L_rem);
 				Serial.print("R:");
 				Serial.println(count_R_rem);
+#endif
 
 				uint16_t dist_c = tof_c.readRangeSingleMillimeters();
 				//最大距離とその時のエンコーダの値を記憶
@@ -620,7 +630,7 @@ void ble_central_setup() {
 		Serial.println(BLEUUID((uint16_t)0x2902).toString().c_str());
 		for (;;);
 	}
-	else Serial.println("Got 2902");
+
 	uint8_t data[2] = { 0x02,0x00 }; //0x01 0x00 -> notify
 	pRD->writeValue(data, 2, false);
 	deviceConnected = true;
@@ -631,17 +641,62 @@ void ble_central_setup() {
 	}
 	// Read the value of the characteristic.
 	std::string value = pRemoteCharacteristic->readValue();
-	Serial.print("The characteristic value was: ");
-	Serial.println(value.c_str());
+	//Serial.print("The characteristic value was: ");
+	//Serial.println(value.c_str());
 
 	pRemoteCharacteristic->registerForNotify(notifyCallback);
 }
 
+void demo()
+{
+	//////////////////////距離取得
+	uint16_t dist_c = tof_c.readRangeSingleMillimeters();
+	//スタック判定
+
+	uint16_t count_L = 0
+	pcnt_get_counter_value(PCNT_UNIT_2, &count_L);
+#ifdef DEBUG
+	Serial.print("Pulse L:");
+	Serial.print(count_L);
+#endif
+
+	if(count_L < 5){
+		dist_c = 0;
+	}
+
+	pcnt_counter_clear(PCNT_UNIT_2);
+	
+	if(dist_c > 50)
+	{	//まっすぐ進む
+		for (int e = 0; e < LEDNUM; e++)
+		{
+			pixels.setPixelColor(e, orange);
+			pixels.show();
+		}
+		rpm_trg_L = 20;
+		rpm_trg_R = 20;
+	}else{
+		//適当な方向に適当な時間だけ回転する
+		if(random(0,100)> 50)
+		{
+			rpm_trg_L = -20;
+			rpm_trg_R = 20;
+		}else
+		{
+			rpm_trg_L = 20;
+			rpm_trg_R = -20;
+		}
+		delay(random(500,3000));
+	}
+
+}
 //////////////////////////setup/////////////////////
 
 void setup()
 {
+#ifdef DEBUG
 	Serial.begin(115200);
+#endif
 
 	//RPM用
 	qei_setup_x4(PCNT_UNIT_0, GPIO_NUM_35, GPIO_NUM_34); //LEFT
@@ -698,9 +753,10 @@ void loop()
 	//モードごとの定期処理
 	switch (mode)
 	{
-	case DEBUG:
+	case DEFAULT:
 	{
-		debug();
+		//debug();
+		demo();
 		break;
 	}
 	case FOLLOW:
@@ -735,7 +791,7 @@ void loop()
 		pixels.clear();
 		switch (mode)
 		{
-		case DEBUG:
+		case DEFAULT:
 		{
 			pixels.setPixelColor(0, orange);
 			pixels.show();
