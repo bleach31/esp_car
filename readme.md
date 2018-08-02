@@ -2,6 +2,9 @@
 
 Cuddling Alexa
 ### software
+esp32、androidはソースコードの中
+
+microbit:https://makecode.microbit.org/_AAq7xpe3sfrz
 
 
 ### hardware
@@ -9,6 +12,9 @@ Cuddling Alexa
 ![bottom.png](bottom.png)
 ![body.png](body.png)
 ![head.png](head.png)
+
+モータマウント：https://www.thingiverse.com/thing:1364768
+↑の12mmのやつ。
 
 #### parts memo
 - 100kオーム 1608 http://akizukidenshi.com/catalog/g/gR-11792/

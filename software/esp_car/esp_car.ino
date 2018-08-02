@@ -324,7 +324,7 @@ void loop_fast(void *pvParameters)
 		else
 		{
 			//FF　90rpmで8vぐらい。FB誤差補正
-			double trg_v = rpm_trg_L * 0.09 + (rpm_trg_L - rpm_L) * 0.01;
+			double trg_v = rpm_trg_L * 0.09 + (rpm_trg_L - rpm_L) * 0.02;
 			MotorL.drive(((int)((trg_v * 1000) / vbat)));
 			/*
 			Serial.print("\t\t\t\t\t\t\t\t\t\t\t\t");
@@ -341,7 +341,7 @@ void loop_fast(void *pvParameters)
 		}
 		else
 		{
-			double trg_v = rpm_trg_R * 0.10 + (rpm_trg_R - rpm_R) * 0.01;
+			double trg_v = rpm_trg_R * 0.09 + (rpm_trg_R - rpm_R) * 0.02;
 			MotorR.drive(((int)((trg_v * 1000) / vbat)));
 		}
 
